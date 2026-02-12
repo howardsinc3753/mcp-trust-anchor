@@ -1,0 +1,20 @@
+# MCP Trust Anchor Server Dependencies
+# Python 3.10+
+
+# Web Framework
+fastapi>=0.109.0
+uvicorn>=0.27.0
+python-dotenv>=1.0.0
+
+# Database
+redis>=5.0.0
+
+# Validation
+pydantic>=2.5.0
+
+# Cryptography
+cryptography>=41.0.0
+
+# Optional: RAG Server (ChromaDB)
+# chromadb>=0.4.0
+# sentence-transformers>=2.2.0

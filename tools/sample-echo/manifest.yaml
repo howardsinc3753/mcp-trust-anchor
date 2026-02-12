@@ -1,0 +1,42 @@
+# Sample Echo Tool - For Testing MCP Trust Anchor
+# This tool echoes back the parameters it receives
+
+canonical_id: "org.example.sample-echo/1.0.0"
+name: "Sample Echo"
+version: "1.0.0"
+description: "Simple echo tool for testing the MCP Trust Anchor framework. Returns the parameters it receives."
+
+metadata:
+  domain: "demo"
+  vendor: "example"
+  author: "MCP Trust Anchor Team"
+  intent: "test"
+  tags:
+    - demo
+    - test
+    - echo
+
+runtime:
+  language: "python"
+  min_version: "3.10"
+
+parameters:
+  - name: "message"
+    type: "string"
+    required: true
+    description: "Message to echo back"
+  - name: "uppercase"
+    type: "boolean"
+    required: false
+    default: false
+    description: "If true, return message in uppercase"
+  - name: "repeat"
+    type: "integer"
+    required: false
+    default: 1
+    description: "Number of times to repeat the message"
+
+capabilities:
+  network_access: false
+  file_access: false
+  requires_credentials: false
