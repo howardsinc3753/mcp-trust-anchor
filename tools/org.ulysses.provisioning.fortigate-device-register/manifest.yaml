@@ -1,0 +1,149 @@
+canonical_id: org.ulysses.provisioning.fortigate-device-register/1.1.0
+name: FortiGate Device Register
+version: 1.1.0
+description: 'Register a FortiGate device in the MCP credentials file.
+
+  Stores host IP and API token for use by other FortiGate tools.
+
+  Used after API token creation during device onboarding.
+
+
+  v1.1.0: Now writes to MCP primary path (~/.config/mcp/) to ensure
+
+  credentials are found by MCP server and all tools.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: configure
+  vendor: fortinet
+  shelf: provisioning/fortigate
+  tags:
+  - fortigate
+  - onboarding
+  - provisioning
+  - credentials
+  - local
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.provisioning.fortigate-device-register.py
+  python_packages:
+  - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+  - config/fortigate_credentials.yaml
+  services: []
+parameters:
+  type: object
+  required:
+  - device_id
+  - host
+  - api_token
+  properties:
+    device_id:
+      type: string
+      description: Unique identifier for the device (e.g., "lab-vm02", "fw-branch01")
+    host:
+      type: string
+      description: FortiGate management IP address
+      format: ipv4
+    api_token:
+      type: string
+      description: REST API token for authentication
+      sensitive: true
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Whether to verify SSL certificates for this device
+    set_default:
+      type: boolean
+      default: false
+      description: Set this device as the default target
+    model:
+      type: string
+      description: Device model for documentation (e.g., "FGT-VM02")
+    firmware:
+      type: string
+      description: Firmware version for documentation (e.g., "7.6.5")
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: Whether registration succeeded
+    device_id:
+      type: string
+      description: Registered device identifier
+    host:
+      type: string
+      description: Registered host IP address
+    credentials_file:
+      type: string
+      description: Path to the credentials file
+    action:
+      type: string
+      description: Whether device was "created" or "updated"
+    is_default:
+      type: boolean
+      description: Whether this device is set as default
+    total_devices:
+      type: integer
+      description: Total number of registered devices
+    message:
+      type: string
+      description: Success message
+    error:
+      type: string
+      description: Error message if success is false
+credentials:
+- ref: local://config/fortigate_credentials.yaml
+  type: config_file
+  required: true
+  scope:
+  - read
+  - write
+  description: Local credentials file to update
+capabilities:
+  network:
+    outbound: []
+    inbound: []
+  filesystem:
+    read:
+    - ~/.config/mcp/*.yaml
+    write:
+    - ~/.config/mcp/fortigate_credentials.yaml
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 5000
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+versioning:
+  breaking_change: false
+  supersedes: null
+security:
+  checksum_sha256: null
+  signature: null
+  cert_chain: null
+  certified: true
+  certified_at: '2026-01-20T03:41:04.831453+00:00'
+  certified_by: trust-anchor
+  notes: 'This tool writes sensitive API tokens to local storage.
+
+    Ensure fortigate_credentials.yaml is:
+
+    - Not committed to git (.gitignore)
+
+    - Readable only by authorized users
+
+    - Backed up securely
+
+    '
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup
+status: certified
+skills_ref: Skills.md

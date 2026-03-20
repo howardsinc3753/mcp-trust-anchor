@@ -1,0 +1,132 @@
+canonical_id: org.ulysses.cloud.fortiflex-config-list/1.0.0
+name: FortiFlex Config List
+version: 1.0.0
+description: 'List all FortiFlex configurations under a program.
+
+  Returns config IDs needed for creating tokens/entitlements.
+
+
+  Use this after fortiflex-programs-list to find available configurations
+
+  before creating tokens with fortiflex-token-create.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: cloud
+  intent: monitor
+  vendor: fortinet
+  shelf: cloud/fortiflex
+  tags:
+  - fortiflex
+  - flexvm
+  - licensing
+  - configurations
+  - discovery
+  - mssp
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.cloud.fortiflex-config-list.py
+  python_packages:
+  - requests>=2.28.0
+  - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+  - config/forticloud_credentials.yaml
+  services: []
+parameters:
+  type: object
+  required: []
+  properties:
+    program_serial_number:
+      type: string
+      description: FortiFlex program serial number (ELAVMSXXXXXXXX)
+    api_username:
+      type: string
+      description: FortiCloud API username (overrides credential file)
+    api_password:
+      type: string
+      description: FortiCloud API password (overrides credential file)
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: Whether configurations were listed
+    program_serial_number:
+      type: string
+      description: Program SN that was queried
+    config_count:
+      type: integer
+      description: Number of configurations found
+    configs:
+      type: array
+      description: List of FortiFlex configurations
+      items:
+        type: object
+        properties:
+          config_id:
+            type: integer
+            description: Configuration ID (use in token-create)
+          name:
+            type: string
+            description: Configuration name
+          product_type:
+            type: string
+            description: Product type name (FortiGate VM, etc.)
+          product_id:
+            type: integer
+            description: Product type ID
+          status:
+            type: string
+            description: Configuration status (ACTIVE, etc.)
+          parameters:
+            type: array
+            description: Configuration parameters (cores, services, etc.)
+    error:
+      type: string
+      description: Error message if success is false
+credentials:
+- ref: vault://forticloud/flexvm
+  type: api_credentials
+  required: false
+  scope:
+  - read
+  description: FortiCloud FortiFlex API credentials
+- ref: local://config/forticloud_credentials.yaml
+  type: config_file
+  required: false
+  description: Local credential file
+capabilities:
+  network:
+    outbound:
+    - https://customerapiauth.fortinet.com:443
+    - https://support.fortinet.com:443
+    inbound: []
+  filesystem:
+    read:
+    - config/*.yaml
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 60000
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+versioning:
+  breaking_change: false
+  supersedes: null
+security:
+  checksum_sha256: null
+  signature: null
+  cert_chain: null
+  certified: true
+  certified_at: '2026-01-20T03:40:55.336923+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup
+status: certified
+skills_ref: Skills.md

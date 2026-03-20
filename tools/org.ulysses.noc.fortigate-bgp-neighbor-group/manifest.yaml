@@ -1,0 +1,153 @@
+canonical_id: org.ulysses.noc.fortigate-bgp-neighbor-group/1.0.0
+name: FortiGate BGP Neighbor Group
+version: 1.0.0
+description: 'Manage BGP neighbor groups on FortiGate devices.
+
+
+  Neighbor groups define common settings for dynamic BGP neighbors,
+
+  used in SD-WAN deployments with ADVPN where spokes connect dynamically.
+
+
+  Supports:
+
+  - List all neighbor groups
+
+  - Get specific neighbor group
+
+  - Create neighbor group with common settings
+
+  - Update neighbor group parameters
+
+  - Delete neighbor group
+
+
+  API endpoint: /api/v2/cmdb/router/bgp/neighbor-group
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: provision
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+  - fortigate
+  - bgp
+  - neighbor-group
+  - sdwan
+  - advpn
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-bgp-neighbor-group.py
+  python_packages:
+  - pyyaml>=6.0
+  - requests>=2.28.0
+  files:
+  - config/fortigate_credentials.yaml
+parameters:
+  type: object
+  required:
+  - target_ip
+  properties:
+    target_ip:
+      type: string
+      format: ipv4
+      description: FortiGate management IP address
+    action:
+      type: string
+      enum:
+      - list
+      - get
+      - add
+      - update
+      - remove
+      default: list
+      description: CRUD action to perform
+    name:
+      type: string
+      description: Neighbor group name (required for get/add/update/remove)
+    remote_as:
+      type: integer
+      description: Remote AS number for the group
+    update_source:
+      type: string
+      description: Source interface for BGP updates (e.g., loopback)
+    soft_reconfiguration:
+      type: string
+      enum:
+      - enable
+      - disable
+      description: Enable soft reconfiguration
+    capability_graceful_restart:
+      type: string
+      enum:
+      - enable
+      - disable
+      description: Enable graceful restart capability
+    capability_route_refresh:
+      type: string
+      enum:
+      - enable
+      - disable
+      description: Enable route refresh capability
+    next_hop_self:
+      type: string
+      enum:
+      - enable
+      - disable
+      description: Set self as next-hop for advertised routes
+    route_reflector_client:
+      type: string
+      enum:
+      - enable
+      - disable
+      description: Configure as route reflector client
+    link_down_failover:
+      type: string
+      enum:
+      - enable
+      - disable
+      description: Enable link down failover
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Verify SSL certificate
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    action:
+      type: string
+    target_ip:
+      type: string
+    neighbor_groups:
+      type: array
+    neighbor_group:
+      type: object
+    message:
+      type: string
+    error:
+      type: string
+credentials:
+- ref: local://config/fortigate_credentials.yaml
+  type: config_file
+  required: true
+capabilities:
+  network:
+    outbound:
+    - https:443
+  filesystem:
+    read:
+    - config/*.yaml
+  max_execution_time_ms: 30000
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-21T15:07:42.995406+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

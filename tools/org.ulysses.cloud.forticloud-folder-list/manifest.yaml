@@ -1,0 +1,122 @@
+canonical_id: org.ulysses.cloud.forticloud-folder-list/1.0.0
+name: FortiCloud Folder List
+version: 1.0.0
+description: 'List asset folders from FortiCloud Asset Management API V3.
+
+  Returns all folders in the asset management hierarchy.
+
+
+  API Base: https://support.fortinet.com/ES/api/registration/v3/
+
+  Client ID: assetmanagement
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: cloud
+  intent: discover
+  vendor: fortinet
+  shelf: cloud/forticloud
+  tags:
+  - forticloud
+  - asset-management
+  - folders
+  - mssp
+  - inventory
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.cloud.forticloud-folder-list.py
+  python_packages:
+  - requests>=2.28.0
+  - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+  - config/forticloud_credentials.yaml
+  services: []
+parameters:
+  type: object
+  required: []
+  properties:
+    account_id:
+      type: integer
+      description: Account ID (required for Org scope, optional for Local scope)
+    api_username:
+      type: string
+      description: FortiCloud API username (overrides credential file)
+    api_password:
+      type: string
+      description: FortiCloud API password (overrides credential file)
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: Whether the API call succeeded
+    folder_count:
+      type: integer
+      description: Number of folders returned
+    folders:
+      type: array
+      description: List of asset folders
+      items:
+        type: object
+        properties:
+          folder_id:
+            type: integer
+            description: Folder ID
+          folder_name:
+            type: string
+            description: Folder name
+          folder_path:
+            type: string
+            description: Full folder path
+          parent_folder_id:
+            type: integer
+            description: Parent folder ID
+    error:
+      type: string
+      description: Error message if success is false
+credentials:
+- ref: vault://forticloud/assetmanagement
+  type: api_credentials
+  required: false
+  scope:
+  - read
+  description: FortiCloud Asset Management API credentials
+- ref: local://config/forticloud_credentials.yaml
+  type: config_file
+  required: false
+  description: Local credential file (fallback when vault unavailable)
+capabilities:
+  network:
+    outbound:
+    - https://customerapiauth.fortinet.com:443
+    - https://support.fortinet.com:443
+    inbound: []
+  filesystem:
+    read:
+    - config/*.yaml
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 60000
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+versioning:
+  breaking_change: false
+  supersedes: null
+security:
+  checksum_sha256: null
+  signature: null
+  cert_chain: null
+  certified: true
+  certified_at: '2026-01-20T03:40:54.897974+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup
+status: certified
+skills_ref: Skills.md

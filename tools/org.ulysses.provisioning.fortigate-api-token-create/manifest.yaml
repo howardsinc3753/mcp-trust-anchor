@@ -1,0 +1,149 @@
+canonical_id: org.ulysses.provisioning.fortigate-api-token-create/1.0.0
+name: FortiGate API Token Create
+version: 1.0.0
+description: 'Create a REST API admin user on FortiGate using session-based authentication.
+
+  Used during initial device onboarding when only admin/password credentials exist.
+
+  Returns the generated API token for subsequent automation.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: configure
+  vendor: fortinet
+  shelf: provisioning/fortigate
+  tags:
+  - fortigate
+  - onboarding
+  - provisioning
+  - api-token
+  - automation
+  - credentials
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.provisioning.fortigate-api-token-create.py
+  python_packages: []
+  dotnet_packages: []
+  files: []
+  services: []
+parameters:
+  type: object
+  required:
+  - target_ip
+  - admin_password
+  properties:
+    target_ip:
+      type: string
+      description: FortiGate management IP address
+      format: ipv4
+    admin_user:
+      type: string
+      default: admin
+      description: Admin username for session authentication
+    admin_password:
+      type: string
+      description: Admin password for session authentication (sensitive)
+      sensitive: true
+    api_username:
+      type: string
+      default: ulysses-api
+      description: Name for the new REST API admin user
+    accprofile:
+      type: string
+      default: super_admin
+      description: Admin profile to assign (super_admin, prof_admin, etc.)
+    trusthost:
+      type: string
+      description: Allowed source IP/network for API access (e.g., 192.168.1.0/24)
+    comments:
+      type: string
+      default: Created by Project Ulysses for automated management
+      description: Description for the API admin user
+    timeout:
+      type: integer
+      default: 30
+      description: Request timeout in seconds
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Verify SSL certificate
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: Whether the API admin was created successfully
+    target_ip:
+      type: string
+      description: Target FortiGate IP address
+    api_username:
+      type: string
+      description: Created API admin username
+    api_token:
+      type: string
+      description: Generated API token (sensitive - store securely)
+      sensitive: true
+    accprofile:
+      type: string
+      description: Assigned admin profile
+    trusthost:
+      type: string
+      description: Configured trusthost (if any)
+    message:
+      type: string
+      description: Success message
+    error:
+      type: string
+      description: Error message if success is false
+    suggestion:
+      type: string
+      description: Suggested action for common errors
+credentials:
+- ref: runtime://admin_password
+  type: password
+  required: true
+  scope:
+  - write
+  description: Admin password provided at runtime (not stored)
+capabilities:
+  network:
+    outbound:
+    - https:443
+    inbound: []
+  filesystem:
+    read: []
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 60000
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+versioning:
+  breaking_change: false
+  supersedes: null
+security:
+  checksum_sha256: null
+  signature: null
+  cert_chain: null
+  certified: true
+  certified_at: '2026-01-20T03:41:04.782293+00:00'
+  certified_by: trust-anchor
+  notes: 'This tool handles sensitive credentials (admin password, API token).
+
+    - Admin password is passed at runtime, never stored
+
+    - Generated API token should be stored securely after receipt
+
+    - Use trusthost parameter to restrict API access by source IP
+
+    '
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup
+status: certified
+skills_ref: Skills.md

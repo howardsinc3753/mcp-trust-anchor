@@ -1,0 +1,204 @@
+canonical_id: org.ulysses.noc.fortigate-firewall-policy/1.0.2
+name: FortiGate Firewall Policy
+version: 1.0.2
+description: 'CRUD operations for firewall policies on FortiGate devices.
+
+
+  Supports:
+
+  - Create policies with NAT, logging, UTM profiles
+
+  - Delete policies by ID or name
+
+  - List all policies
+
+  - Get specific policy details
+
+  - Position control (top/bottom of policy list)
+
+  - **VIP references in dstaddr** for port forwarding/DNAT
+
+
+  Note: Policies reference address/service objects that must exist.
+
+  Use "all" for addresses and "ALL" for services as defaults.
+
+  VIPs created with fortigate-vip can be referenced in dstaddr.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: configure
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+  - fortigate
+  - firewall
+  - policy
+  - security
+  - crud
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-firewall-policy.py
+  python_packages:
+  - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+  - config/fortigate_credentials.yaml
+  services: []
+parameters:
+  type: object
+  required:
+  - target_ip
+  - action
+  properties:
+    target_ip:
+      type: string
+      description: FortiGate management IP address
+      format: ipv4
+    action:
+      type: string
+      enum:
+      - add
+      - remove
+      - list
+      - get
+      description: Operation to perform
+    policy_id:
+      type: integer
+      description: Policy ID (for get/remove)
+    name:
+      type: string
+      description: Policy name (required for add, optional for remove)
+    srcintf:
+      type: array
+      items:
+        type: string
+      description: Source interface/zone list
+    dstintf:
+      type: array
+      items:
+        type: string
+      description: Destination interface/zone list
+    srcaddr:
+      type: array
+      items:
+        type: string
+      default:
+      - all
+      description: Source address objects
+    dstaddr:
+      type: array
+      items:
+        type: string
+      default:
+      - all
+      description: Destination address objects
+    service:
+      type: array
+      items:
+        type: string
+      default:
+      - ALL
+      description: Service objects
+    schedule:
+      type: string
+      default: always
+      description: Schedule object name
+    policy_action:
+      type: string
+      enum:
+      - accept
+      - deny
+      default: accept
+      description: Policy action
+    nat:
+      type: boolean
+      default: false
+      description: Enable source NAT
+    logtraffic:
+      type: string
+      enum:
+      - all
+      - utm
+      - disable
+      default: all
+      description: Traffic logging mode
+    utm_status:
+      type: boolean
+      default: false
+      description: Enable UTM inspection
+    ips_sensor:
+      type: string
+      description: IPS sensor profile name
+    av_profile:
+      type: string
+      description: Antivirus profile name
+    webfilter_profile:
+      type: string
+      description: Web filter profile name
+    ssl_ssh_profile:
+      type: string
+      description: SSL/SSH inspection profile name
+    position:
+      type: string
+      enum:
+      - top
+      - bottom
+      default: top
+      description: Policy position (top=edit 0, bottom=append)
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Verify SSL certificates
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    action:
+      type: string
+    target_ip:
+      type: string
+    policy_id:
+      type: integer
+    policies:
+      type: array
+      items:
+        type: object
+    message:
+      type: string
+    errors:
+      type: array
+      items:
+        type: string
+credentials:
+- ref: local://config/fortigate_credentials.yaml
+  type: config_file
+  required: true
+  scope:
+  - read
+  description: Local credential file with API tokens
+capabilities:
+  network:
+    outbound:
+    - https:443
+    inbound: []
+  filesystem:
+    read:
+    - config/*.yaml
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 60000
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-20T03:41:00.898348+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

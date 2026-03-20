@@ -1,0 +1,129 @@
+canonical_id: org.ulysses.noc.fortigate-sdwan-neighbor/1.2.0
+name: FortiGate SD-WAN Neighbor
+version: 1.2.0
+description: 'CRUD operations for SD-WAN neighbor statements on FortiGate devices.
+
+
+  Configure BGP neighbors with:
+
+  - IP address and member binding (supports multiple members)
+
+  - Route metric method (priority-based)
+
+  - Health check reference for SLA-based routing
+
+  - Minimum SLA meet members setting
+
+
+  v1.2.0: Re-signed with MCP standard credential paths.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: provision
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+  - fortigate
+  - sdwan
+  - neighbor
+  - bgp
+  - advpn
+  - sla
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-sdwan-neighbor.py
+  python_packages:
+  - pyyaml>=6.0
+  files:
+  - config/fortigate_credentials.yaml
+parameters:
+  type: object
+  required:
+  - target_ip
+  - action
+  properties:
+    target_ip:
+      type: string
+      description: FortiGate management IP
+      format: ipv4
+    action:
+      type: string
+      enum:
+      - add
+      - update
+      - remove
+      - list
+      - get
+      description: Operation to perform
+    ip:
+      type: string
+      description: Neighbor IP address (required for add/update/remove/get)
+    members:
+      type: array
+      items:
+        type: integer
+      description: SD-WAN member seq-nums to bind (e.g., [3, 4])
+    route_metric:
+      type: string
+      enum:
+      - priority
+      - latency
+      - jitter
+      - packetloss
+      - bandwidth
+      default: priority
+      description: Route metric method for path selection
+    health_check:
+      type: string
+      description: Health check name for SLA binding
+    sla_id:
+      type: integer
+      description: SLA ID within health check to use
+    minimum_sla_meet_members:
+      type: integer
+      description: Minimum members meeting SLA (default 1)
+    mode:
+      type: string
+      enum:
+      - sla
+      - speedtest
+      description: SD-WAN neighbor mode
+    verify_ssl:
+      type: boolean
+      default: false
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    action:
+      type: string
+    neighbors:
+      type: array
+    neighbor:
+      type: object
+    message:
+      type: string
+credentials:
+- ref: local://config/fortigate_credentials.yaml
+  type: config_file
+  required: true
+capabilities:
+  network:
+    outbound:
+    - https:443
+  filesystem:
+    read:
+    - config/*.yaml
+  max_execution_time_ms: 60000
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-21T14:20:25.964711+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

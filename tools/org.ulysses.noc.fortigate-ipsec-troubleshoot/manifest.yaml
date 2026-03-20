@@ -1,0 +1,157 @@
+canonical_id: org.ulysses.noc.fortigate-ipsec-troubleshoot/1.0.0
+name: FortiGate IPsec Troubleshoot
+version: 1.0.0
+description: |
+  In-depth IPsec VPN tunnel troubleshooting for FortiGate devices.
+
+  Performs comprehensive diagnostics including Phase1/Phase2 status,
+  IKE error analysis, DPD health, NPU offload verification, and
+  optional packet capture with analysis.
+
+  Uses SSH for diagnostic commands and API for configuration retrieval.
+
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: troubleshoot
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+    - fortigate
+    - ipsec
+    - vpn
+    - troubleshoot
+    - sdwan
+
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-ipsec-troubleshoot.py
+  python_packages:
+    - pyyaml>=6.0
+    - requests>=2.28.0
+    - paramiko>=3.0.0
+  files:
+    - config/fortigate_credentials.yaml
+
+parameters:
+  type: object
+  required:
+    - target_ip
+    - tunnel_name
+  properties:
+    target_ip:
+      type: string
+      format: ipv4
+      description: FortiGate management IP address
+    tunnel_name:
+      type: string
+      description: IPsec Phase1 tunnel name to troubleshoot
+    action:
+      type: string
+      enum:
+        - diagnose
+        - capture
+        - delta
+      default: diagnose
+      description: |
+        diagnose: Read-only analysis of tunnel health
+        capture: Run 10-packet capture and analyze
+        delta: Compare error counters over 1 minute
+    capture_type:
+      type: string
+      enum:
+        - ike
+        - esp
+      default: ike
+      description: Type of traffic to capture (IKE negotiation or ESP data)
+    capture_count:
+      type: integer
+      default: 10
+      maximum: 50
+      description: Number of packets to capture (max 50)
+    capture_timeout:
+      type: integer
+      default: 30
+      description: Capture timeout in seconds
+    thresholds:
+      type: object
+      description: Custom thresholds for warnings (default >100)
+      properties:
+        dpd_fail_old_hit:
+          type: integer
+          default: 100
+        isakmp_timeout:
+          type: integer
+          default: 100
+        retrans_send:
+          type: integer
+          default: 100
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Verify SSL certificate for API calls
+
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    tunnel_name:
+      type: string
+    target_ip:
+      type: string
+    health:
+      type: string
+      enum: [healthy, degraded, critical, unknown]
+    phase1_status:
+      type: string
+    phase2_status:
+      type: object
+    issues:
+      type: array
+      items:
+        type: object
+        properties:
+          category:
+            type: string
+          severity:
+            type: string
+          finding:
+            type: string
+          remediation:
+            type: string
+    counters:
+      type: object
+    npu_status:
+      type: object
+    capture_analysis:
+      type: object
+    recommended_commands:
+      type: object
+    error:
+      type: string
+
+credentials:
+  - ref: local://config/fortigate_credentials.yaml
+    type: config_file
+    required: true
+
+capabilities:
+  network:
+    outbound:
+      - https:443
+      - ssh:22
+  filesystem:
+    read:
+      - config/*.yaml
+  max_execution_time_ms: 120000
+
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-21T16:23:53.176573Z'
+  certified_by: admin
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

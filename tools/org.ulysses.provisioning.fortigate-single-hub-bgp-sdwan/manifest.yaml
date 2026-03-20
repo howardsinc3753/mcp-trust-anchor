@@ -1,0 +1,164 @@
+canonical_id: org.ulysses.provisioning.fortigate-single-hub-bgp-sdwan/1.0.0
+name: FortiGate Single-Hub BGP SD-WAN Template
+version: 1.0.0
+description: 'Provisions a complete SD-WAN topology with BGP routing over IPsec overlay.
+
+
+  Hub configuration:
+
+  - Dynamic IPsec tunnel (accepts spoke connections)
+
+  - BGP with neighbor-range for dynamic spoke peering
+
+  - SD-WAN zone and member
+
+  - Static routes for spoke loopback reachability
+
+
+  Spoke configuration:
+
+  - Static IPsec tunnel to hub
+
+  - BGP neighbor peering with hub loopback
+
+  - SD-WAN zone, member, and health check
+
+  - Static routes for hub loopback reachability
+
+
+  Reference: Fortinet 4D-Demo SD-WAN architecture
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: configure
+  vendor: fortinet
+  shelf: provisioning/fortigate
+  tags:
+  - fortigate
+  - sdwan
+  - bgp
+  - ipsec
+  - hub-spoke
+  - provisioning
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.provisioning.fortigate-single-hub-bgp-sdwan.py
+  python_packages:
+  - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+  - config/fortigate_credentials.yaml
+  services: []
+parameters:
+  type: object
+  required:
+  - role
+  - target_ip
+  - psk
+  properties:
+    role:
+      type: string
+      enum:
+      - hub
+      - spoke
+      description: Device role in SD-WAN topology
+    target_ip:
+      type: string
+      description: Device management IP address
+      format: ipv4
+    hub_wan_ip:
+      type: string
+      description: Hub's WAN IP (required for spoke)
+      format: ipv4
+    hub_loopback_ip:
+      type: string
+      description: Hub loopback IP with mask (e.g., "172.16.255.253 255.255.255.255")
+    spoke_loopback_ip:
+      type: string
+      description: Spoke loopback IP with mask (required for spoke role)
+    psk:
+      type: string
+      description: Pre-shared key for IPsec (sensitive)
+      sensitive: true
+    bgp_as:
+      type: integer
+      default: 65000
+      description: BGP AS number (same for hub and spokes - iBGP)
+    tunnel_name:
+      type: string
+      default: SPOKE_VPN1
+      description: IPsec tunnel name (hub uses SPOKE_VPN1, spoke uses HUB_VPN1)
+    sdwan_zone:
+      type: string
+      default: SDWAN_OVERLAY
+      description: SD-WAN zone name
+    network_id:
+      type: integer
+      default: 1
+      minimum: 1
+      maximum: 255
+      description: Overlay network ID (must match between hub and spoke)
+    hub_loopback_name:
+      type: string
+      default: Hub_Lo
+      description: Hub loopback interface name
+    spoke_loopback_name:
+      type: string
+      default: Spoke_Lo
+      description: Spoke loopback interface name
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Verify SSL certificates
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    role:
+      type: string
+    target_ip:
+      type: string
+    components_created:
+      type: array
+      items:
+        type: string
+    errors:
+      type: array
+      items:
+        type: string
+    wan_interface:
+      type: string
+    message:
+      type: string
+credentials:
+- ref: local://config/fortigate_credentials.yaml
+  type: config_file
+  required: true
+  scope:
+  - read
+  description: Local credential file with API tokens
+capabilities:
+  network:
+    outbound:
+    - https:443
+    inbound: []
+  filesystem:
+    read:
+    - config/*.yaml
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 120000
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-20T03:41:05.199267+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

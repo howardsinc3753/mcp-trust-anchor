@@ -1,0 +1,127 @@
+canonical_id: org.ulysses.noc.fortigate-top-bandwidth/1.2.0
+name: FortiGate Top Bandwidth Analyzer
+version: 1.2.0
+description: >-
+  Identify top bandwidth consumers on a FortiGate device by source IP, user,
+  or application. Includes session-scan mode that queries the live session
+  table to reliably correlate app + source IP + bandwidth in a single call.
+  Also supports FortiView, traffic log, and app-ctrl log fusion modes.
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: monitor
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+    - fortigate
+    - bandwidth
+    - top-talkers
+    - fortiview
+    - triage
+    - capacity
+    - network
+    - session-scan
+    - app-drill
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-top-bandwidth.py
+  python_packages: []
+parameters:
+  type: object
+  required:
+    - target_ip
+  properties:
+    target_ip:
+      type: string
+      description: FortiGate management IP address
+    port:
+      type: integer
+      default: 10443
+      description: HTTPS management port (default 10443)
+    mode:
+      type: string
+      default: top-sources
+      enum:
+        - top-sources
+        - top-apps
+        - session-scan
+        - app-drill
+        - enable-tracking
+      description: "Query mode: top-sources, top-apps, session-scan, app-drill, enable-tracking"
+    top_n:
+      type: integer
+      default: 5
+      description: Number of top consumers to return (1-50)
+    time_period:
+      type: string
+      default: hour
+      description: "Time period for top-apps mode: hour, day, week"
+    rows:
+      type: integer
+      default: 2000
+      description: Number of traffic log rows to analyze for top-sources mode (max 2000)
+    sort_by:
+      type: string
+      default: total
+      description: "Sort by: total (sent+recv), sent, received"
+    view:
+      type: string
+      default: by-app
+      enum:
+        - by-app
+        - by-source
+      description: "session-scan mode: aggregate by application or by source IP"
+    enrich_apps:
+      type: boolean
+      default: true
+      description: "top-sources mode: enrich each source IP with top app activity from app-ctrl logs"
+    enrich_sources:
+      type: boolean
+      default: true
+      description: "top-apps mode: enrich each app with top source IPs from app-ctrl logs"
+    app_name:
+      type: string
+      description: "app-drill mode: application name to investigate (e.g., YouTube)"
+    app_id:
+      type: integer
+      description: "app-drill mode: FortiGate application ID (alternative to app_name)"
+    timeout:
+      type: integer
+      default: 30
+      description: Total execution timeout in seconds (budget shared across API calls)
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    device:
+      type: object
+    mode:
+      type: string
+    execution_time_s:
+      type: number
+      description: Total execution time in seconds
+    top_consumers:
+      type: array
+    summary:
+      type: object
+    error:
+      type: string
+credentials: []
+capabilities:
+  network:
+    outbound:
+      - "https://{target_ip}:{port}/api/v2/*"
+    inbound: []
+  filesystem:
+    read:
+      - "~/.config/mcp/fortigate_credentials.yaml"
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 60000
+versioning:
+  breaking_change: false
+  supersedes: org.ulysses.noc.fortigate-top-bandwidth/1.1.0

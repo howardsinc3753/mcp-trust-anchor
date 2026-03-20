@@ -1,0 +1,146 @@
+canonical_id: org.ulysses.noc.fortigate-vip/1.0.1
+name: FortiGate VIP
+version: 1.0.1
+description: 'CRUD operations for Virtual IP (VIP) objects on FortiGate devices.
+
+
+  Configure VIPs for:
+
+  - Static NAT (1:1 mapping)
+
+  - Port forwarding (DNAT)
+
+  - Server load balancing
+
+
+  VIPs can be referenced in firewall policies as destination addresses.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: configure
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+  - fortigate
+  - vip
+  - nat
+  - dnat
+  - port-forwarding
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-vip.py
+  python_packages:
+  - pyyaml>=6.0
+  files:
+  - config/fortigate_credentials.yaml
+parameters:
+  type: object
+  required:
+  - target_ip
+  - action
+  properties:
+    target_ip:
+      type: string
+      description: FortiGate management IP
+      format: ipv4
+    action:
+      type: string
+      enum:
+      - add
+      - update
+      - remove
+      - list
+      - get
+      description: Operation to perform
+    name:
+      type: string
+      description: VIP name (required for add/update/remove/get)
+    extip:
+      type: string
+      description: External IP address (required for add)
+    mappedip:
+      type: string
+      description: Mapped/internal IP address (required for add)
+    extintf:
+      type: string
+      description: External interface (required for add)
+    portforward:
+      type: string
+      enum:
+      - enable
+      - disable
+      description: Enable port forwarding
+    protocol:
+      type: string
+      enum:
+      - tcp
+      - udp
+      - sctp
+      - icmp
+      description: Protocol for port forwarding
+    extport:
+      type: string
+      description: External port or range (e.g., "541" or "80-443")
+    mappedport:
+      type: string
+      description: Mapped port or range
+    comment:
+      type: string
+      description: VIP comment/description
+    type:
+      type: string
+      enum:
+      - static-nat
+      - load-balance
+      - server-load-balance
+      - dns-translation
+      - fqdn
+      description: VIP type (default static-nat)
+    arp_reply:
+      type: string
+      enum:
+      - enable
+      - disable
+      description: Respond to ARP requests
+    color:
+      type: integer
+      description: Icon color (0-32)
+    verify_ssl:
+      type: boolean
+      default: false
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    action:
+      type: string
+    vips:
+      type: array
+    vip:
+      type: object
+    message:
+      type: string
+credentials:
+- ref: local://config/fortigate_credentials.yaml
+  type: config_file
+  required: true
+capabilities:
+  network:
+    outbound:
+    - https:443
+  filesystem:
+    read:
+    - config/*.yaml
+  max_execution_time_ms: 60000
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-20T03:41:03.515850+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

@@ -1,0 +1,129 @@
+canonical_id: org.ulysses.noc.fortigate-bgp-network-advertise/1.0.1
+name: FortiGate BGP Network Advertise
+version: 1.0.1
+description: 'CRUD operations for BGP network statements on FortiGate devices.
+
+
+  Supports:
+
+  - Add network prefixes to BGP for advertisement
+
+  - Remove network prefixes from BGP
+
+  - List current BGP network statements
+
+  - Optional route-map filtering for prefix advertisement
+
+
+  Note: BGP will not advertise a network unless the route exists in the
+
+  routing table, unless ''synchronous disable'' is configured.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: configure
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+  - fortigate
+  - bgp
+  - routing
+  - network-advertisement
+  - crud
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-bgp-network-advertise.py
+  python_packages:
+  - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+  - config/fortigate_credentials.yaml
+  services: []
+parameters:
+  type: object
+  required:
+  - target_ip
+  - action
+  properties:
+    target_ip:
+      type: string
+      description: FortiGate management IP address
+      format: ipv4
+    action:
+      type: string
+      enum:
+      - add
+      - remove
+      - list
+      description: Operation to perform (add, remove, or list networks)
+    prefix:
+      type: string
+      description: Network prefix to add/remove (e.g., "10.0.0.0 255.255.255.0" or
+        "10.0.0.0/24")
+    network_id:
+      type: integer
+      description: Network ID for add/remove (auto-assigned if not specified for add)
+    route_map:
+      type: string
+      description: Route-map name to apply to this network (optional)
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Verify SSL certificates
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    action:
+      type: string
+    target_ip:
+      type: string
+    networks:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+          prefix:
+            type: string
+          route_map:
+            type: string
+    message:
+      type: string
+    errors:
+      type: array
+      items:
+        type: string
+credentials:
+- ref: local://config/fortigate_credentials.yaml
+  type: config_file
+  required: true
+  scope:
+  - read
+  description: Local credential file with API tokens
+capabilities:
+  network:
+    outbound:
+    - https:443
+    inbound: []
+  filesystem:
+    read:
+    - config/*.yaml
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 60000
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-20T03:41:00.598966+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

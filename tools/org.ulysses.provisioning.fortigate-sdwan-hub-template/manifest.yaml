@@ -1,0 +1,128 @@
+canonical_id: org.ulysses.provisioning.fortigate-sdwan-hub-template/1.0.0
+name: FortiGate SD-WAN Hub Template
+version: 1.0.0
+description: 'Provision a FortiGate as an SD-WAN hub to accept spoke connections.
+
+  Creates IPsec tunnel (dynamic mode), SD-WAN zone, loopback, and firewall policies.
+
+  This is a simplified template without ADVPN/BGP for basic hub-spoke topology.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: configure
+  vendor: fortinet
+  shelf: provisioning/fortigate
+  tags:
+  - fortigate
+  - sdwan
+  - hub
+  - ipsec
+  - provisioning
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.provisioning.fortigate-sdwan-hub-template.py
+  python_packages:
+  - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+  - config/fortigate_credentials.yaml
+  services: []
+parameters:
+  type: object
+  required:
+  - target_ip
+  - loopback_ip
+  - psk
+  properties:
+    target_ip:
+      type: string
+      description: Hub FortiGate management IP address
+      format: ipv4
+    loopback_ip:
+      type: string
+      description: Hub loopback IP with mask (e.g., "172.16.255.253 255.255.255.255")
+    psk:
+      type: string
+      description: Pre-shared key for IPsec (sensitive)
+      sensitive: true
+    loopback_name:
+      type: string
+      default: Hub_Lo
+      description: Loopback interface name
+    tunnel_name:
+      type: string
+      default: SPOKE_VPN1
+      description: IPsec tunnel name (spokes connect to this)
+    wan_interface:
+      type: string
+      description: WAN interface for tunnel binding (auto-detects if not set)
+    sdwan_zone:
+      type: string
+      default: SDWAN_OVERLAY
+      description: SD-WAN zone name for overlay
+    network_id:
+      type: integer
+      default: 1
+      minimum: 1
+      maximum: 255
+      description: Network overlay ID (must match spoke config)
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Verify SSL certificates
+    timeout:
+      type: integer
+      default: 30
+      description: API request timeout in seconds
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    target_ip:
+      type: string
+    components_created:
+      type: array
+      items:
+        type: string
+    errors:
+      type: array
+      items:
+        type: string
+    config_summary:
+      type: object
+    message:
+      type: string
+    error:
+      type: string
+credentials:
+- ref: local://config/fortigate_credentials.yaml
+  type: config_file
+  required: true
+  scope:
+  - read
+  description: Local credential file with API tokens
+capabilities:
+  network:
+    outbound:
+    - https:443
+    inbound: []
+  filesystem:
+    read:
+    - config/*.yaml
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 60000
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-20T03:41:05.015893+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

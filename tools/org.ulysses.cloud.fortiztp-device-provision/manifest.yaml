@@ -1,0 +1,179 @@
+canonical_id: org.ulysses.cloud.fortiztp-device-provision/1.0.4
+name: FortiZTP Device Provision
+version: 1.0.4
+description: |
+  Provision or unprovision a device for Zero Touch Provisioning.
+
+  Assigns a device to FortiManager, FortiGateCloud, or other targets with
+  optional bootstrap scripts. When device boots, it connects to the assigned
+  target and pulls configuration.
+
+  IMPORTANT: FortiZTP does NOT support ORG IAM API Users. Only Local type works.
+
+  API Base: https://fortiztp.forticloud.com/public/api/v2
+  Client ID: fortiztp
+
+metadata:
+  org_namespace: ulysses
+  domain: cloud
+  intent: provision
+  vendor: fortinet
+  shelf: cloud/fortiztp
+  tags:
+    - fortiztp
+    - zero-touch-provisioning
+    - device
+    - provision
+    - fortimanager
+    - fortigate
+    - deployment
+
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.cloud.fortiztp-device-provision.py
+  python_packages:
+    - requests>=2.28.0
+    - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+    - config/forticloud_credentials.yaml
+  services: []
+
+parameters:
+  type: object
+  required:
+    - device_sn
+    - device_type
+  properties:
+    device_sn:
+      type: string
+      description: Device serial number to provision
+    device_type:
+      type: string
+      enum:
+        - FortiGate
+        - FortiAP
+        - FortiSwitch
+        - FortiExtender
+      description: Device type (required by FortiZTP API)
+    provision_status:
+      type: string
+      enum:
+        - provisioned
+        - unprovisioned
+      description: Set to 'provisioned' to enable ZTP, 'unprovisioned' to disable
+      default: provisioned
+    provision_target:
+      type: string
+      enum:
+        - FortiManager
+        - FortiGateCloud
+        - FortiEdgeCloud
+        - ExternalController
+      description: Target for device provisioning
+    region:
+      type: string
+      description: FortiCloud region (required for cloud targets)
+    fortimanager_oid:
+      type: integer
+      description: FortiManager OID (use fortiztp-fmg-list to find)
+    script_oid:
+      type: integer
+      description: Script OID for bootstrap configuration (use fortiztp-script-list to find)
+    use_default_script:
+      type: boolean
+      description: Use the default script instead of script_oid
+    external_controller_sn:
+      type: string
+      description: External controller serial number
+    external_controller_ip:
+      type: string
+      description: External controller IP address
+    firmware_profile:
+      type: string
+      description: Firmware profile name
+    api_username:
+      type: string
+      description: FortiCloud API username (overrides credential file)
+    api_password:
+      type: string
+      description: FortiCloud API password (overrides credential file)
+
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: Whether the provisioning succeeded
+    message:
+      type: string
+      description: Status message
+    device:
+      type: object
+      properties:
+        serial_number:
+          type: string
+          description: Device serial number
+        device_type:
+          type: string
+          description: Device type
+        provision_status:
+          type: string
+          description: New provision status
+        provision_target:
+          type: string
+          description: Target for provisioning
+        fortimanager_oid:
+          type: integer
+          description: FortiManager OID
+        script_oid:
+          type: integer
+          description: Script OID
+    error:
+      type: string
+      description: Error message if success is false
+
+credentials:
+  - ref: vault://forticloud/fortiztp
+    type: api_credentials
+    required: false
+    scope:
+      - write
+    description: FortiCloud ZTP API credentials (Local IAM user only)
+  - ref: local://config/forticloud_credentials.yaml
+    type: config_file
+    required: false
+    description: Local credential file
+
+capabilities:
+  network:
+    outbound:
+      - https://customerapiauth.fortinet.com:443
+      - https://fortiztp.forticloud.com:443
+    inbound: []
+  filesystem:
+    read:
+      - config/*.yaml
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 60000
+
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+
+versioning:
+  breaking_change: false
+  supersedes: null
+
+security:
+  checksum_sha256: null
+  signature: null
+  cert_chain: null
+
+status: draft
+skills_ref: Skills.md

@@ -1,0 +1,73 @@
+canonical_id: org.ulysses.provisioning.fortigate-config-ssh/1.0.0
+oid: 1.2.3.2.1.6
+name: FortiGate Config SSH
+version: 1.0.0
+description: |
+  Execute configuration commands on FortiGate via SSH.
+
+  WRITE-CAPABLE tool for provisioning workflows.
+  Use for initial device setup before API credentials exist.
+
+  Supports multi-line config blocks and execute commands.
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: configure
+  vendor: fortinet
+  shelf: provisioning/fortigate
+  author: Trust-Bot Tool Maker
+  created: '2026-01-25'
+  tags:
+  - fortigate
+  - ssh
+  - config
+  - provisioning
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.provisioning.fortigate-config-ssh.py
+  python_packages:
+  - paramiko>=3.0
+parameters:
+  type: object
+  required:
+  - target_ip
+  - commands
+  properties:
+    target_ip:
+      type: string
+      description: FortiGate management IP address
+    commands:
+      type: array
+      description: List of CLI commands to execute
+    admin_password:
+      type: string
+      sensitive: true
+      default: "FG@dm!n2026!"
+      description: Admin password for SSH
+    admin_user:
+      type: string
+      default: "admin"
+      description: Admin username
+output:
+  success:
+    type: boolean
+  output:
+    type: string
+    description: Combined command output
+  error:
+    type: string
+capabilities:
+  network:
+    outbound:
+    - ssh:22
+    inbound: []
+  filesystem:
+    read: []
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 120000
+status: draft
+skills_ref: Skills.md

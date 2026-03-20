@@ -1,0 +1,174 @@
+canonical_id: org.ulysses.noc.fortigate-session-table-v76/1.0.0
+name: FortiGate Session Table (FortiOS 7.6+)
+version: 1.0.0
+description: 'Retrieve active firewall sessions from FortiGate devices running FortiOS
+  7.6+.
+
+  Essential for troubleshooting connectivity, identifying top talkers,
+
+  and investigating potential security incidents.
+
+
+  NOTE: This tool uses the /api/v2/monitor/firewall/sessions (plural) endpoint
+
+  introduced in FortiOS 7.6. For FortiOS 7.4 and earlier, use
+
+  org.ulysses.noc.fortigate-session-table instead.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: troubleshoot
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+  - fortigate
+  - session
+  - firewall
+  - noc
+  - troubleshooting
+  - fortios-7.6
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-session-table-v76.py
+  python_packages:
+  - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+  - config/fortigate_credentials.yaml
+  services: []
+parameters:
+  type: object
+  required:
+  - target_ip
+  properties:
+    target_ip:
+      type: string
+      description: FortiGate management IP address
+      format: ipv4
+    count:
+      type: integer
+      default: 100
+      description: Maximum sessions to return (20-1000, API enforced range)
+    filter_srcip:
+      type: string
+      description: Filter by source IP address
+    filter_dstip:
+      type: string
+      description: Filter by destination IP address
+    filter_srcport:
+      type: integer
+      description: Filter by source port
+    filter_dstport:
+      type: integer
+      description: Filter by destination port
+    filter_policy:
+      type: integer
+      description: Filter by policy ID
+    filter_protocol:
+      type: string
+      description: Filter by protocol (tcp, udp, icmp, etc.)
+    filter_srcintf:
+      type: string
+      description: Filter by source interface name
+    filter_dstintf:
+      type: string
+      description: Filter by destination interface name
+    filter_country:
+      type: string
+      description: Filter by destination country name
+    filter_username:
+      type: string
+      description: Filter by authenticated username
+    ip_version:
+      type: string
+      default: ipv4
+      description: IP version filter (ipv4, ipv6, ipboth)
+    include_summary:
+      type: boolean
+      default: true
+      description: Include session summary statistics
+    timeout:
+      type: integer
+      default: 30
+      description: Request timeout in seconds
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Verify SSL certificate
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: Whether the query succeeded
+    target_ip:
+      type: string
+      description: Target FortiGate IP address
+    firmware_version:
+      type: string
+      description: Indicates tool is for FortiOS 7.6+
+    total_sessions:
+      type: integer
+      description: Total session count on device
+    matched_sessions:
+      type: integer
+      description: Sessions matching filters
+    returned_count:
+      type: integer
+      description: Number of sessions returned
+    summary:
+      type: object
+      description: Session statistics (if include_summary=true)
+    sessions:
+      type: array
+      description: Array of session details
+    error:
+      type: string
+      description: Error message if success is false
+credentials:
+- ref: vault://fortigate/admin
+  type: api_key
+  required: false
+  scope:
+  - read
+  description: FortiGate API key with read access
+- ref: local://config/fortigate_credentials.yaml
+  type: config_file
+  required: false
+  description: Local credential file (fallback when vault unavailable)
+capabilities:
+  network:
+    outbound:
+    - https:443
+    inbound: []
+  filesystem:
+    read:
+    - config/*.yaml
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 30000
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+versioning:
+  breaking_change: false
+  supersedes: null
+security:
+  checksum_sha256: null
+  signature: null
+  cert_chain: null
+  certified: true
+  certified_at: '2026-01-20T03:41:02.916736+00:00'
+  certified_by: trust-anchor
+  min_firmware: 7.6.0
+  max_firmware: null
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup
+status: certified
+skills_ref: Skills.md

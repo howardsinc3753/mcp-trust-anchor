@@ -1,0 +1,216 @@
+# FortiGate IPsec Tunnel Create Tool Manifest
+# Version: 1.0.0
+
+canonical_id: org.ulysses.noc.fortigate-ipsec-tunnel-create/1.0.0
+name: FortiGate IPsec Tunnel Create
+version: 1.0.0
+description: |
+  Create a SINGLE IPsec tunnel (Phase1 + Phase2) on a FortiGate device.
+
+  This tool is for adding tunnels to EXISTING configurations.
+  For initial SD-WAN setup, use the sdwan-hub-template or sdwan-spoke-template tools.
+
+  Key Features:
+  - Automatic net-device setting based on tunnel type (CRITICAL for SD-WAN)
+  - Static tunnels (Spoke): net-device=enable, requires remote_gw
+  - Dynamic tunnels (Hub): net-device=disable, accepts any spoke
+  - Enforces unique network_id for SD-WAN compatibility
+
+  CRITICAL LESSONS:
+  - PSK must match exactly on both ends
+  - network_id MUST be unique per tunnel (1-255)
+  - net-device=disable REQUIRED for dynamic/hub tunnels with SD-WAN
+  - Tunnel won't come up until added to firewall policy or SD-WAN zone
+
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: configure
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+    - fortigate
+    - ipsec
+    - vpn
+    - tunnel
+    - sdwan
+    - network
+
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-ipsec-tunnel-create.py
+  python_packages:
+    - pyyaml>=6.0
+  dotnet_packages: []
+  files: []
+  services: []
+
+parameters:
+  type: object
+  required:
+    - target_ip
+    - tunnel_name
+    - tunnel_type
+    - psk
+    - network_id
+  properties:
+    target_ip:
+      type: string
+      description: FortiGate management IP address
+      format: ipv4
+    tunnel_name:
+      type: string
+      description: |
+        Name for Phase1 and Phase2 interfaces.
+        Convention: HUB{n}-VPN{n} for spoke, SPOKE_VPN{n} for hub
+    tunnel_type:
+      type: string
+      enum:
+        - static
+        - dynamic
+      description: |
+        Tunnel type determines behavior:
+        - static: Spoke/Initiator - connects TO a hub (requires remote_gw)
+        - dynamic: Hub/Responder - accepts connections FROM spokes
+    psk:
+      type: string
+      description: |
+        Pre-shared key. MUST be identical on both hub and spoke.
+        Keep simple during testing to avoid encoding issues.
+    network_id:
+      type: integer
+      minimum: 1
+      maximum: 255
+      description: |
+        CRITICAL: Must be UNIQUE per tunnel for SD-WAN routing.
+        Check existing tunnels to avoid conflicts.
+    remote_gw:
+      type: string
+      format: ipv4
+      description: |
+        Hub's WAN IP address. REQUIRED for static (spoke) tunnels.
+        Not used for dynamic (hub) tunnels.
+    interface:
+      type: string
+      description: WAN interface name (auto-detected if not specified)
+    localid:
+      type: string
+      description: |
+        Local identifier for spoke tunnels. Helps hub identify this spoke.
+        Default: spoke-{tunnel_name}
+    ike_version:
+      type: integer
+      enum: [1, 2]
+      default: 2
+      description: IKE version
+    proposal:
+      type: string
+      default: aes256-sha256
+      description: Encryption proposal
+    dhgrp:
+      type: string
+      default: "20 21"
+      description: Diffie-Hellman groups
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Verify SSL certificate
+
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: Whether tunnel creation succeeded
+    target_ip:
+      type: string
+      description: Target FortiGate IP
+    tunnel_name:
+      type: string
+      description: Created tunnel name
+    tunnel_type:
+      type: string
+      description: static or dynamic
+    network_id:
+      type: integer
+      description: Network overlay ID
+    interface:
+      type: string
+      description: WAN interface used
+    phase1_created:
+      type: boolean
+      description: Phase1 creation status
+    phase2_created:
+      type: boolean
+      description: Phase2 creation status
+    net_device:
+      type: string
+      description: net-device setting applied (enable/disable)
+    remote_gw:
+      type: string
+      description: Remote gateway (static tunnels only)
+    localid:
+      type: string
+      description: Local ID (static tunnels only)
+    message:
+      type: string
+      description: Success message
+    next_steps:
+      type: array
+      items:
+        type: string
+      description: Required actions after tunnel creation
+    warnings:
+      type: array
+      items:
+        type: string
+      description: Important warnings
+    error:
+      type: string
+      description: Error message if failed
+    hint:
+      type: string
+      description: Helpful hint for resolving errors
+
+credentials:
+  - ref: local://~/.config/mcp/fortigate_credentials.yaml
+    type: config_file
+    required: true
+    description: |
+      FortiGate credentials file. Use credential-manager or
+      fortigate-device-register to create if missing.
+
+capabilities:
+  network:
+    outbound:
+      - https:443
+    inbound: []
+  filesystem:
+    read:
+      - ~/.config/mcp/*.yaml
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 30000
+
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+
+versioning:
+  breaking_change: false
+  supersedes: null
+
+security:
+  checksum_sha256: null
+  signature: null
+  cert_chain: null
+  certified: false
+  certified_at: null
+  certified_by: null
+
+status: draft
+skills_ref: Skills.md

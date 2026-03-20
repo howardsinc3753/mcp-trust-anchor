@@ -1,0 +1,136 @@
+canonical_id: org.ulysses.cloud.fortisase-user-create/1.0.0
+name: FortiSASE User Create
+version: 1.0.0
+description: 'Create users in FortiSASE via browser automation.
+
+  Uses Playwright to automate the FortiSASE portal user creation workflow.
+
+
+  Note: FortiSASE does not provide a public API for user management,
+
+  so browser automation is required.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: cloud
+  intent: configure
+  vendor: fortinet
+  shelf: cloud/fortisase
+  tags:
+  - fortisase
+  - sase
+  - user
+  - create
+  - browser
+  - playwright
+  - onboarding
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.cloud.fortisase-user-create.py
+  python_packages:
+  - playwright>=1.40.0
+  - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+  - config/forticloud_credentials.yaml
+  services: []
+parameters:
+  type: object
+  required:
+  - email
+  properties:
+    email:
+      type: string
+      description: User email address
+    first_name:
+      type: string
+      description: User first name
+    last_name:
+      type: string
+      description: User last name
+    user_group:
+      type: string
+      description: User group to assign
+    send_invite:
+      type: boolean
+      default: true
+      description: Send invitation email to user
+    headless:
+      type: boolean
+      default: true
+      description: Run browser in headless mode
+    admin_username:
+      type: string
+      description: FortiSASE admin username (overrides config)
+    admin_password:
+      type: string
+      description: FortiSASE admin password (overrides config)
+    mfa_secret:
+      type: string
+      description: TOTP secret for admin MFA
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: Whether user was created
+    message:
+      type: string
+      description: Success message
+    user:
+      type: object
+      description: Created user details
+      properties:
+        email:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        user_group:
+          type: string
+        invite_sent:
+          type: boolean
+    error:
+      type: string
+      description: Error message if failed
+credentials:
+- ref: local://config/forticloud_credentials.yaml
+  type: config_file
+  required: true
+  description: FortiSASE admin credentials (fortisase section)
+capabilities:
+  network:
+    outbound:
+    - https://login.forticloud.com:443
+    - https://www.fortisase.com:443
+    - https://*.fortisase.com:443
+    inbound: []
+  filesystem:
+    read:
+    - config/*.yaml
+    write: []
+  process:
+    spawn: true
+    elevated: false
+  max_execution_time_ms: 180000
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+versioning:
+  breaking_change: false
+  supersedes: null
+security:
+  checksum_sha256: null
+  signature: null
+  cert_chain: null
+  certified: true
+  certified_at: '2026-01-20T03:40:55.645510+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup
+status: certified
+skills_ref: Skills.md

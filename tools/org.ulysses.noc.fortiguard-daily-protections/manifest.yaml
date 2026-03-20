@@ -1,0 +1,194 @@
+canonical_id: org.ulysses.noc.fortiguard-daily-protections/1.1.0
+name: FortiGuard Daily Protections Report
+version: 1.1.0
+description: 'Shows partners the latest protections they received TODAY from FortiGuard.
+
+
+  Fetches real-time data from FortiGuard threat intelligence feeds including:
+
+  - Antivirus signatures (malware, ransomware, trojans)
+
+  - IPS rules (exploit protection, vulnerability coverage)
+
+  - Web filter categories and URL ratings
+
+  - Application control signatures
+
+  - Outbreak alerts and emergency updates
+
+
+  Generates a partner-friendly HTML report highlighting what''s protecting
+
+  their network RIGHT NOW. Perfect for partner briefings and customer updates.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: monitor
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+  - fortigate
+  - fortiguard
+  - threat-intelligence
+  - partner-report
+  - daily-update
+  - antivirus
+  - ips
+  - web-filter
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortiguard-daily-protections.py
+  python_packages: []
+  dotnet_packages: []
+  files: []
+  services: []
+parameters:
+  type: object
+  required: []
+  properties:
+    output_dir:
+      type: string
+      default: C:\Temp
+      description: Directory to save HTML report
+    open_browser:
+      type: boolean
+      default: true
+      description: Auto-open report in default browser
+    include_av:
+      type: boolean
+      default: true
+      description: Include Antivirus signature updates
+    include_ips:
+      type: boolean
+      default: true
+      description: Include IPS rule updates
+    include_web:
+      type: boolean
+      default: true
+      description: Include Web Filter updates
+    include_app:
+      type: boolean
+      default: true
+      description: Include Application Control updates
+    include_outbreak:
+      type: boolean
+      default: true
+      description: Include Outbreak alerts
+    max_items:
+      type: integer
+      default: 25
+      description: Maximum items to display per category
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: Whether the report was generated successfully
+    report_path:
+      type: string
+      description: Path to the generated HTML report
+    summary:
+      type: object
+      description: Summary statistics of today's protections
+      properties:
+        total_updates:
+          type: integer
+          description: Total number of protection updates today
+        av_signatures:
+          type: integer
+          description: New antivirus signatures today
+        av_total:
+          type: integer
+          description: Total antivirus signatures in database
+        av_db_version:
+          type: string
+          description: Antivirus database version
+        ips_rules:
+          type: integer
+          description: New/updated IPS rules today
+        ips_total:
+          type: integer
+          description: Total IPS rules in database
+        ips_db_version:
+          type: string
+          description: IPS database version
+        sandbox_zerodays:
+          type: integer
+          description: Total zero-days caught by FortiSandbox
+        sandbox_zerodays_today:
+          type: integer
+          description: Zero-days caught today
+        sandbox_samples:
+          type: integer
+          description: Total samples analyzed by sandbox
+        outbreak_alerts:
+          type: integer
+          description: Active outbreak alerts
+        last_update:
+          type: string
+          description: Timestamp of last FortiGuard update
+    database_details:
+      type: object
+      description: Detailed database version information
+      properties:
+        av:
+          type: object
+          description: Antivirus database details
+        ips:
+          type: object
+          description: IPS database details
+        sandbox:
+          type: object
+          description: FortiSandbox cloud details
+    highlights:
+      type: array
+      description: Top highlights for partner summary
+      items:
+        type: object
+        properties:
+          category:
+            type: string
+          name:
+            type: string
+          severity:
+            type: string
+          description:
+            type: string
+    browser_opened:
+      type: boolean
+      description: Whether browser was opened successfully
+    message:
+      type: string
+      description: Human-readable summary message
+credentials: []
+capabilities:
+  network:
+    outbound:
+    - https:443
+    inbound: []
+  filesystem:
+    read: []
+    write:
+    - C:\Temp\*.html
+  process:
+    spawn: true
+    elevated: false
+  max_execution_time_ms: 60000
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+versioning:
+  breaking_change: false
+  supersedes: null
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-20T20:23:51.517218+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

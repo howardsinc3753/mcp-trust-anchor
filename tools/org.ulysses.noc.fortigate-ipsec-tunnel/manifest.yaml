@@ -1,0 +1,144 @@
+canonical_id: org.ulysses.noc.fortigate-ipsec-tunnel/1.1.0
+name: FortiGate IPsec Tunnel
+version: 1.1.0
+description: 'Manage IPsec VPN tunnels on FortiGate devices.
+
+
+  Supports:
+
+  - List all IPsec phase1 interfaces (tunnels)
+
+  - Get tunnel operational status
+
+  - Shutdown tunnel interfaces (admin down)
+
+  - Bring up tunnel interfaces (admin up)
+
+
+  Use for failover testing: shutdown tunnel, verify BGP fails over,
+
+  then bring tunnel back up.
+
+
+  v1.1.0: Re-signed with MCP standard credential paths.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: troubleshoot
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+  - fortigate
+  - ipsec
+  - vpn
+  - tunnel
+  - failover
+  - sdwan
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-ipsec-tunnel.py
+  python_packages:
+  - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+  - config/fortigate_credentials.yaml
+  services: []
+parameters:
+  type: object
+  required:
+  - target_ip
+  properties:
+    target_ip:
+      type: string
+      description: FortiGate management IP address
+      format: ipv4
+    action:
+      type: string
+      enum:
+      - list
+      - status
+      - shutdown
+      - up
+      - down
+      default: list
+      description: 'Action to perform:
+
+        - list: List all IPsec tunnels with config
+
+        - status: Get tunnel operational status
+
+        - shutdown/down: Admin down the tunnel interface
+
+        - up: Admin up the tunnel interface
+
+        '
+    tunnel_name:
+      type: string
+      description: Tunnel/interface name (required for shutdown/up actions)
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Verify SSL certificates
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    action:
+      type: string
+    target_ip:
+      type: string
+    tunnels:
+      type: array
+      items:
+        type: object
+        properties:
+          name:
+            type: string
+          interface:
+            type: string
+          remote_gw:
+            type: string
+          status:
+            type: string
+          type:
+            type: string
+    interface:
+      type: string
+    status:
+      type: string
+    message:
+      type: string
+    error:
+      type: string
+credentials:
+- ref: local://config/fortigate_credentials.yaml
+  type: config_file
+  required: true
+  scope:
+  - read
+  description: Local credential file with API tokens
+capabilities:
+  network:
+    outbound:
+    - https:443
+    inbound: []
+  filesystem:
+    read:
+    - config/*.yaml
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 60000
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-21T14:46:11.605471+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

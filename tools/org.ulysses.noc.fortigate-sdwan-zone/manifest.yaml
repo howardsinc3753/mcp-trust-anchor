@@ -1,0 +1,111 @@
+canonical_id: org.ulysses.noc.fortigate-sdwan-zone/1.0.0
+name: FortiGate SD-WAN Zone
+version: 1.0.0
+description: 'CRUD operations for SD-WAN zones on FortiGate devices.
+
+
+  Configure SD-WAN zones with:
+
+  - Zone naming and service types
+
+  - ADVPN shortcut selection (advpn-select)
+
+  - ADVPN health check binding (advpn-health-check)
+
+
+  Based on Fortinet 4D-Demo configurations for ADVPN with SD-WAN.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: configure
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+  - fortigate
+  - sdwan
+  - zone
+  - advpn
+  - overlay
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-sdwan-zone.py
+  python_packages:
+  - pyyaml>=6.0
+  files:
+  - config/fortigate_credentials.yaml
+parameters:
+  type: object
+  required:
+  - target_ip
+  properties:
+    target_ip:
+      type: string
+      description: FortiGate management IP
+      format: ipv4
+    action:
+      type: string
+      enum:
+      - add
+      - update
+      - remove
+      - list
+      - get
+      default: list
+      description: Operation to perform
+    name:
+      type: string
+      description: Zone name (required for add/update/remove/get)
+    service_access:
+      type: string
+      enum:
+      - allow
+      - deny
+      description: Service access setting
+    advpn_select:
+      type: boolean
+      description: Enable ADVPN shortcut selection for this zone
+    advpn_health_check:
+      type: string
+      description: Health check name for ADVPN shortcut selection
+    minimum_sla_meet_members:
+      type: integer
+      description: Minimum members meeting SLA for ADVPN
+    verify_ssl:
+      type: boolean
+      default: false
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    action:
+      type: string
+    zones:
+      type: array
+    zone:
+      type: object
+    message:
+      type: string
+credentials:
+- ref: local://config/fortigate_credentials.yaml
+  type: config_file
+  required: true
+capabilities:
+  network:
+    outbound:
+    - https:443
+  filesystem:
+    read:
+    - config/*.yaml
+  max_execution_time_ms: 60000
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-20T03:41:02.865496+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

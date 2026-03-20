@@ -1,0 +1,111 @@
+canonical_id: org.ulysses.cloud.fortiztp-fmg-list/1.0.2
+name: FortiZTP FortiManager List
+version: 1.0.2
+description: |
+  List FortiManagers registered for Zero Touch Provisioning.
+
+  Returns FortiManager OIDs needed for device provisioning.
+  Each FMG entry shows serial number, IP, and associated script.
+
+  IMPORTANT: FortiZTP does NOT support ORG IAM API Users. Only Local type works.
+
+  API Base: https://fortiztp.forticloud.com/public/api/v2
+  Client ID: fortiztp
+
+metadata:
+  org_namespace: ulysses
+  domain: cloud
+  intent: provision
+  vendor: fortinet
+  shelf: cloud/fortiztp
+  tags:
+    - fortiztp
+    - zero-touch-provisioning
+    - fortimanager
+    - inventory
+
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.cloud.fortiztp-fmg-list.py
+  python_packages:
+    - requests>=2.28.0
+    - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+    - config/forticloud_credentials.yaml
+  services: []
+
+parameters:
+  type: object
+  required: []
+  properties:
+    api_username:
+      type: string
+      description: FortiCloud API username (overrides credential file)
+    api_password:
+      type: string
+      description: FortiCloud API password (overrides credential file)
+
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    fortimanager_count:
+      type: integer
+    fortimanagers:
+      type: array
+      items:
+        type: object
+        properties:
+          oid:
+            type: integer
+            description: FortiManager OID (use for provisioning)
+          serial_number:
+            type: string
+          ip_address:
+            type: string
+          script_oid:
+            type: integer
+          update_time:
+            type: string
+    error:
+      type: string
+
+credentials:
+  - ref: local://config/forticloud_credentials.yaml
+    type: config_file
+    required: false
+
+capabilities:
+  network:
+    outbound:
+      - https://customerapiauth.fortinet.com:443
+      - https://fortiztp.forticloud.com:443
+    inbound: []
+  filesystem:
+    read:
+      - config/*.yaml
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 60000
+
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+
+versioning:
+  breaking_change: false
+  supersedes: null
+
+security:
+  checksum_sha256: null
+  signature: null
+  cert_chain: null
+
+status: draft
+skills_ref: Skills.md

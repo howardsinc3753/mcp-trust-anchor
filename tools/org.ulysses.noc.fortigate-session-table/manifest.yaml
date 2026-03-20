@@ -1,0 +1,192 @@
+canonical_id: org.ulysses.noc.fortigate-session-table/1.0.0
+name: FortiGate Session Table
+version: 1.0.0
+description: 'Retrieve active firewall sessions from FortiGate device.
+
+  Essential for troubleshooting connectivity, identifying top talkers,
+
+  and investigating potential security incidents.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: troubleshoot
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+  - fortigate
+  - sessions
+  - network
+  - firewall
+  - troubleshooting
+  - connections
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-session-table.py
+  python_packages:
+  - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+  - config/fortigate_credentials.yaml
+  services: []
+parameters:
+  type: object
+  required:
+  - target_ip
+  properties:
+    target_ip:
+      type: string
+      description: FortiGate management IP address
+      format: ipv4
+    count:
+      type: integer
+      default: 20
+      description: Maximum number of sessions to return (1-1000)
+    filter_srcip:
+      type: string
+      description: Filter sessions by source IP address
+    filter_dstip:
+      type: string
+      description: Filter sessions by destination IP address
+    filter_dport:
+      type: integer
+      description: Filter sessions by destination port
+    filter_policy:
+      type: integer
+      description: Filter sessions by policy ID
+    sort_by:
+      type: string
+      enum:
+      - bytes
+      - packets
+      - duration
+      - expiry
+      default: bytes
+      description: Sort sessions by this field (descending)
+    timeout:
+      type: integer
+      default: 30
+      description: Request timeout in seconds
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Verify SSL certificate
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: Whether the query succeeded
+    target_ip:
+      type: string
+      description: Target FortiGate IP address
+    total_sessions:
+      type: integer
+      description: Total active session count on device
+    returned_count:
+      type: integer
+      description: Number of sessions returned in this response
+    sessions:
+      type: array
+      description: Array of session details
+      items:
+        type: object
+        properties:
+          src_ip:
+            type: string
+            description: Source IP address
+          src_port:
+            type: integer
+            description: Source port
+          dst_ip:
+            type: string
+            description: Destination IP address
+          dst_port:
+            type: integer
+            description: Destination port
+          proto:
+            type: string
+            description: Protocol (TCP, UDP, ICMP, etc.)
+          proto_num:
+            type: integer
+            description: Protocol number
+          policy_id:
+            type: integer
+            description: Matching firewall policy ID
+          bytes_in:
+            type: integer
+            description: Bytes received
+          bytes_out:
+            type: integer
+            description: Bytes sent
+          packets_in:
+            type: integer
+            description: Packets received
+          packets_out:
+            type: integer
+            description: Packets sent
+          duration:
+            type: integer
+            description: Session duration in seconds
+          expiry:
+            type: integer
+            description: Seconds until session expires
+          state:
+            type: string
+            description: Session state
+          src_intf:
+            type: string
+            description: Source interface
+          dst_intf:
+            type: string
+            description: Destination interface
+          country:
+            type: string
+            description: Destination country (geo-IP)
+    error:
+      type: string
+      description: Error message if success is false
+credentials:
+- ref: vault://fortigate/admin
+  type: api_key
+  required: false
+  scope:
+  - read
+  description: FortiGate API key with read access
+- ref: local://config/fortigate_credentials.yaml
+  type: config_file
+  required: false
+  description: Local credential file (fallback when vault unavailable)
+capabilities:
+  network:
+    outbound:
+    - https:443
+    inbound: []
+  filesystem:
+    read:
+    - config/*.yaml
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 30000
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+versioning:
+  breaking_change: false
+  supersedes: null
+security:
+  checksum_sha256: null
+  signature: null
+  cert_chain: null
+  certified: true
+  certified_at: '2026-01-20T03:41:02.982900+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup
+status: certified
+skills_ref: Skills.md

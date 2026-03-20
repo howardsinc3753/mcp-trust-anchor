@@ -1,0 +1,93 @@
+canonical_id: org.ulysses.provisioning.fortigate-set-hostname/1.0.0
+name: FortiGate Set Hostname
+version: 1.0.0
+description: 'Set the hostname on a FortiGate device via REST API.
+
+  Uses Bearer token authentication (FortiOS 7.6+ compatible).
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: configure
+  vendor: fortinet
+  shelf: provisioning/fortigate
+  tags:
+  - fortigate
+  - provisioning
+  - hostname
+  - configuration
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.provisioning.fortigate-set-hostname.py
+  python_packages:
+  - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+  - config/fortigate_credentials.yaml
+  services: []
+parameters:
+  type: object
+  required:
+  - target_ip
+  - hostname
+  properties:
+    target_ip:
+      type: string
+      description: FortiGate management IP address
+      format: ipv4
+    hostname:
+      type: string
+      description: New hostname (max 35 chars, must start with alphanumeric)
+    timeout:
+      type: integer
+      default: 30
+      description: Request timeout in seconds
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Verify SSL certificate
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    target_ip:
+      type: string
+    hostname:
+      type: string
+    previous_hostname:
+      type: string
+    message:
+      type: string
+    error:
+      type: string
+credentials:
+- ref: local://config/fortigate_credentials.yaml
+  type: config_file
+  required: true
+  scope:
+  - read
+  description: Local credential file with API tokens
+capabilities:
+  network:
+    outbound:
+    - https:443
+    inbound: []
+  filesystem:
+    read:
+    - config/*.yaml
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 30000
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-20T03:41:05.148726+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

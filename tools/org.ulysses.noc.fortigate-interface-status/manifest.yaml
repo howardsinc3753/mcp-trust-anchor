@@ -1,0 +1,239 @@
+canonical_id: org.ulysses.noc.fortigate-interface-status/1.0.0
+name: FortiGate Interface Status
+version: 1.0.0
+description: 'Get interface status and NIC statistics from a FortiGate device.
+
+  Includes REST API interface data, optional deep NIC diagnostics via CLI,
+
+  and active error detection (samples 3x over 6 seconds to detect increasing errors).
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: monitor
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+  - fortigate
+  - interface
+  - nic
+  - network
+  - monitoring
+  - diagnostics
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-interface-status.py
+  python_packages:
+  - pyyaml>=6.0
+parameters:
+  type: object
+  required:
+  - target_ip
+  properties:
+    target_ip:
+      type: string
+      description: FortiGate management IP address or hostname
+    interfaces:
+      type: array
+      items:
+        type: string
+      description: Optional list of specific interface names to query
+    include_nic_diag:
+      type: boolean
+      default: false
+      description: Include deep NIC diagnostics via CLI commands
+    detect_active_errors:
+      type: boolean
+      default: false
+      description: Sample 3x over 6 seconds to detect if errors are actively increasing
+    timeout:
+      type: integer
+      default: 30
+      description: API request timeout in seconds
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Verify SSL certificate
+output_schema:
+  type: object
+  required:
+  - success
+  properties:
+    success:
+      type: boolean
+      description: Whether the operation succeeded
+    error:
+      type: string
+      description: Error message if success=false
+    target_ip:
+      type: string
+      description: Target that was queried
+    interface_count:
+      type: integer
+      description: Number of interfaces returned
+    interfaces:
+      type: array
+      items:
+        type: object
+        properties:
+          name:
+            type: string
+          ip:
+            type: string
+          status:
+            type: string
+          link:
+            type: boolean
+          speed:
+            type: integer
+          duplex:
+            type: string
+          mac:
+            type: string
+          rx_bytes:
+            type: integer
+          tx_bytes:
+            type: integer
+          rx_errors:
+            type: integer
+          tx_errors:
+            type: integer
+    nic_diagnostics:
+      type: array
+      description: Deep NIC stats (when include_nic_diag=true)
+      items:
+        type: object
+        properties:
+          interface:
+            type: string
+          rx_dropped:
+            type: integer
+          tx_dropped:
+            type: integer
+          state:
+            type: string
+          link:
+            type: string
+          speed:
+            type: string
+    error_detection:
+      type: object
+      description: Active error detection results (when detect_active_errors=true)
+      properties:
+        samples_taken:
+          type: integer
+          description: Number of samples collected
+        interval_seconds:
+          type: integer
+          description: Seconds between samples
+        total_sample_time_sec:
+          type: integer
+          description: Total sampling duration
+        error_trend:
+          type: string
+          enum:
+          - INCREASING
+          - STABLE
+          - NONE
+          description: Overall error trend across all interfaces
+        interfaces_with_active_errors:
+          type: integer
+          description: Count of interfaces with increasing errors
+        active_errors:
+          type: array
+          description: Interfaces with actively increasing errors
+          items:
+            type: object
+            properties:
+              interface:
+                type: string
+              rx_errors_start:
+                type: integer
+              rx_errors_end:
+                type: integer
+              rx_errors_delta:
+                type: integer
+              tx_errors_start:
+                type: integer
+              tx_errors_end:
+                type: integer
+              tx_errors_delta:
+                type: integer
+              sample_interval_sec:
+                type: integer
+              status:
+                type: string
+    summary:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: Total interface count
+        up:
+          type: integer
+          description: Interfaces with link up
+        down:
+          type: integer
+          description: Interfaces with link down
+        with_errors:
+          type: integer
+          description: Interfaces with RX/TX errors
+        error_trend:
+          type: string
+          enum:
+          - INCREASING
+          - STABLE
+          - NONE
+          - UNKNOWN
+          description: Overall error trend (INCREASING=active problem, STABLE=historical,
+            NONE=healthy)
+        interfaces_with_active_errors:
+          type: integer
+          description: Count of interfaces with actively increasing errors
+        active_error_interfaces:
+          type: array
+          items:
+            type: string
+          description: List of interface names with active errors
+        rx_drops:
+          type: integer
+          description: Total RX drops (with NIC diag)
+        tx_drops:
+          type: integer
+          description: Total TX drops (with NIC diag)
+        drop_status:
+          type: string
+          enum:
+          - OK
+          - MINOR
+          - WARNING
+          - CRITICAL
+          description: Overall drop health status
+credentials:
+- ref: vault://fortinet/fortigate
+  type: api_key
+  required: true
+- ref: local://config/fortigate_credentials.yaml
+  type: file
+  required: false
+capabilities:
+  network:
+    outbound:
+    - https:443
+  filesystem:
+    read:
+    - config/*.yaml
+    - ~/.config/mcp/*.yaml
+  process:
+    spawn: false
+  max_execution_time_ms: 60000
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-20T03:41:01.200022+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

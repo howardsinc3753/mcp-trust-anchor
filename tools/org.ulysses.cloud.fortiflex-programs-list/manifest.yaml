@@ -1,0 +1,132 @@
+canonical_id: org.ulysses.cloud.fortiflex-programs-list/1.0.0
+name: FortiFlex Programs List
+version: 1.0.0
+description: 'List all FortiFlex programs available in your FortiCloud account.
+
+  Returns program serial numbers (ELAVMSXXXXXXXX format) needed for
+
+  creating configurations and entitlements.
+
+
+  Use this as the first step in FortiFlex provisioning workflows.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: cloud
+  intent: monitor
+  vendor: fortinet
+  shelf: cloud/fortiflex
+  tags:
+  - fortiflex
+  - flexvm
+  - licensing
+  - programs
+  - discovery
+  - mssp
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.cloud.fortiflex-programs-list.py
+  python_packages:
+  - requests>=2.28.0
+  - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+  - config/forticloud_credentials.yaml
+  services: []
+parameters:
+  type: object
+  required: []
+  properties:
+    api_username:
+      type: string
+      description: FortiCloud API username (overrides credential file)
+    api_password:
+      type: string
+      description: FortiCloud API password (overrides credential file)
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: Whether programs were listed
+    program_count:
+      type: integer
+      description: Number of programs found
+    programs:
+      type: array
+      description: List of FortiFlex programs
+      items:
+        type: object
+        properties:
+          serial_number:
+            type: string
+            description: Program serial number (ELAVMSXXXXXXXX)
+          account_id:
+            type: integer
+            description: FortiCloud account ID
+          start_date:
+            type: string
+            description: Program start date
+          end_date:
+            type: string
+            description: Program end date
+          has_support_coverage:
+            type: boolean
+            description: Whether support is included
+          points:
+            type: object
+            properties:
+              available:
+                type: integer
+                description: Available FortiFlex points
+              used:
+                type: integer
+                description: Used FortiFlex points
+    error:
+      type: string
+      description: Error message if success is false
+credentials:
+- ref: vault://forticloud/flexvm
+  type: api_credentials
+  required: false
+  scope:
+  - read
+  description: FortiCloud FortiFlex API credentials
+- ref: local://config/forticloud_credentials.yaml
+  type: config_file
+  required: false
+  description: Local credential file
+capabilities:
+  network:
+    outbound:
+    - https://customerapiauth.fortinet.com:443
+    - https://support.fortinet.com:443
+    inbound: []
+  filesystem:
+    read:
+    - config/*.yaml
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 60000
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+versioning:
+  breaking_change: false
+  supersedes: null
+security:
+  checksum_sha256: null
+  signature: null
+  cert_chain: null
+  certified: true
+  certified_at: '2026-01-20T03:40:55.389211+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup
+status: certified
+skills_ref: Skills.md

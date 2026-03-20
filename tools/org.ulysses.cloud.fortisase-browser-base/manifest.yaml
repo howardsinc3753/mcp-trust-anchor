@@ -1,0 +1,136 @@
+canonical_id: org.ulysses.cloud.fortisase-browser-base/1.0.0
+name: FortiSASE Browser Automation Base
+version: 1.0.0
+description: 'Browser automation foundation for FortiSASE portal operations.
+
+  Provides login, navigation, and session management for Playwright-based tools.
+
+
+  Used as a base library by other FortiSASE tools that require portal access
+
+  where no API is available.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: cloud
+  intent: execute
+  vendor: fortinet
+  shelf: cloud/fortisase
+  tags:
+  - fortisase
+  - sase
+  - browser
+  - playwright
+  - automation
+  - portal
+  - login
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.cloud.fortisase-browser-base.py
+  python_packages:
+  - playwright>=1.40.0
+  - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+  - config/forticloud_credentials.yaml
+  services: []
+parameters:
+  type: object
+  required: []
+  properties:
+    action:
+      type: string
+      enum:
+      - login
+      - navigate
+      - screenshot
+      - get_data
+      default: login
+      description: Action to perform
+    section:
+      type: string
+      description: Portal section for navigate action
+    screenshot_name:
+      type: string
+      description: Name prefix for screenshot files
+    headless:
+      type: boolean
+      default: true
+      description: Run browser in headless mode
+    username:
+      type: string
+      description: FortiSASE portal username (overrides config)
+    password:
+      type: string
+      description: FortiSASE portal password (overrides config)
+    tenant_id:
+      type: string
+      description: FortiSASE tenant/organization ID
+    mfa_secret:
+      type: string
+      description: TOTP secret for MFA (base32 encoded)
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: Whether the action succeeded
+    action:
+      type: string
+      description: Action that was performed
+    message:
+      type: string
+      description: Success message
+    current_url:
+      type: string
+      description: Current page URL after action
+    path:
+      type: string
+      description: Screenshot path (for screenshot action)
+    table_data:
+      type: array
+      description: Extracted table data (for get_data action)
+    error:
+      type: string
+      description: Error message if failed
+credentials:
+- ref: local://config/forticloud_credentials.yaml
+  type: config_file
+  required: true
+  description: FortiSASE portal credentials (fortisase section)
+capabilities:
+  network:
+    outbound:
+    - https://login.forticloud.com:443
+    - https://www.fortisase.com:443
+    - https://*.fortisase.com:443
+    inbound: []
+  filesystem:
+    read:
+    - config/*.yaml
+    write:
+    - C:/ProgramData/Ulysses/sessions/*.png
+  process:
+    spawn: true
+    elevated: false
+  max_execution_time_ms: 180000
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+versioning:
+  breaking_change: false
+  supersedes: null
+security:
+  checksum_sha256: null
+  signature: null
+  cert_chain: null
+  certified: true
+  certified_at: '2026-01-20T03:40:55.599391+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup
+status: certified
+skills_ref: Skills.md

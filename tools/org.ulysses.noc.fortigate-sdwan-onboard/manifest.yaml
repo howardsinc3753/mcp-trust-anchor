@@ -1,0 +1,178 @@
+canonical_id: org.ulysses.noc.fortigate-sdwan-onboard/1.0.1
+oid: "1.2.1.2.3.50"
+name: FortiGate SD-WAN Onboard
+version: 1.0.1
+description: |
+  Complete SD-WAN site onboarding workflow with FortiFlex license integration.
+  Orchestrates license provisioning, config generation, and manifest tracking.
+
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: provision
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+    - fortigate
+    - sdwan
+    - onboarding
+    - fortiflex
+    - licensing
+    - provisioning
+  author: Trust-Bot Tool Maker
+  created: 2026-01-18
+  updated: 2026-01-18
+
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-sdwan-onboard.py
+  python_packages:
+    - requests
+    - pyyaml
+  files: []
+
+parameters:
+  type: object
+  required:
+    - action
+  properties:
+    action:
+      type: string
+      description: "Action: provision-license, generate-config, complete, full-onboard"
+    license_type:
+      type: string
+      description: |
+        License type - IMPORTANT for workflow:
+        - 'fortiflex': VM deployments (requires token application)
+        - 'standard': Hardware appliances (pre-licensed)
+    site_name:
+      type: string
+      description: Site hostname/name
+    site_id:
+      type: integer
+      description: Unique site ID (1-254)
+    wan_ip:
+      type: string
+      description: WAN interface IP address
+    wan_gateway:
+      type: string
+      description: WAN default gateway
+    lan_ip:
+      type: string
+      description: LAN interface gateway IP
+    lan_network:
+      type: string
+      description: LAN network in CIDR notation
+    config_id:
+      type: integer
+      description: Existing FortiFlex config ID to use
+    config_name:
+      type: string
+      description: Name for new FortiFlex configuration
+    cpu:
+      type: integer
+      description: CPU cores for FortiFlex config (1,2,4,8,16,32)
+      default: 2
+    services:
+      type: array
+      description: Service codes for FortiFlex (FC, UTP, ENT, ATP)
+    provision_license:
+      type: boolean
+      description: Whether to provision FortiFlex license (for fortiflex type)
+      default: true
+    fortiflex_token:
+      type: string
+      description: Pre-provisioned FortiFlex license token
+    fortiflex_serial:
+      type: string
+      description: Pre-provisioned FortiFlex serial number (FGVMXXXXXX)
+    fortiflex_config_name:
+      type: string
+      description: FortiFlex configuration name
+    fortiflex_status:
+      type: string
+      description: FortiFlex license status
+    fortiflex_end_date:
+      type: string
+      description: FortiFlex license end date
+    device_serial:
+      type: string
+      description: Hardware device serial number (for standard type)
+    device_model:
+      type: string
+      description: Device model (e.g., FortiWiFi-50G-5G)
+    license_name:
+      type: string
+      description: License/contract name
+    license_start_date:
+      type: string
+      description: License start date (YYYY-MM-DD)
+    license_end_date:
+      type: string
+      description: License end date (YYYY-MM-DD)
+    target_ip:
+      type: string
+      description: FortiGate management IP (for complete action)
+    add_to_manifest:
+      type: boolean
+      description: Add site to SD-WAN manifest
+      default: true
+
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: Whether the operation succeeded
+    step:
+      type: string
+      description: Current workflow step
+    license:
+      type: object
+      description: FortiFlex license details
+    config:
+      type: object
+      description: Generated configuration details
+    steps_completed:
+      type: array
+      description: List of completed steps
+    steps_remaining:
+      type: array
+      description: Manual steps remaining
+
+capabilities:
+  network:
+    outbound:
+      - https:443
+      - ssh:22
+  filesystem:
+    read:
+      - "*.yaml"
+      - "*.conf"
+    write:
+      - "*.yaml"
+      - "*.conf"
+  max_execution_time_ms: 300000
+
+dependencies:
+  - requests
+  - pyyaml
+
+related_tools:
+  - org.ulysses.cloud.fortiflex-programs-list
+  - org.ulysses.cloud.fortiflex-config-list
+  - org.ulysses.cloud.fortiflex-config-create
+  - org.ulysses.cloud.fortiflex-token-create
+  - org.ulysses.noc.fortigate-sdwan-blueprint-planner
+  - org.ulysses.noc.fortigate-sdwan-manifest-tracker
+  - org.ulysses.noc.fortigate-config-push
+
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-25T23:58:04.940794Z'
+  certified_by: admin
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  notes: v1.0.1 - Fixed manifest schema (added metadata wrapper)

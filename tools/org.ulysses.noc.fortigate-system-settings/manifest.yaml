@@ -1,0 +1,115 @@
+canonical_id: org.ulysses.noc.fortigate-system-settings/1.0.0
+name: FortiGate System Settings
+version: 1.0.0
+description: |
+  Configure FortiGate system settings (config system settings).
+
+  Manages settings like location-id, IKE TCP port, GUI themes,
+  and other VDOM-level system parameters.
+
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: provision
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+    - fortigate
+    - system
+    - settings
+    - sdwan
+
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-system-settings.py
+  python_packages:
+    - pyyaml>=6.0
+    - requests>=2.28.0
+  files:
+    - config/fortigate_credentials.yaml
+
+parameters:
+  type: object
+  required:
+    - target_ip
+  properties:
+    target_ip:
+      type: string
+      format: ipv4
+      description: FortiGate management IP address
+    action:
+      type: string
+      enum:
+        - get
+        - set
+      default: get
+      description: Get current settings or set new values
+    location_id:
+      type: string
+      format: ipv4
+      description: Location ID (overlay IP for SD-WAN ADVPN)
+    ike_tcp_port:
+      type: integer
+      description: IKE over TCP port (default 443, common 11443)
+    gui_theme:
+      type: string
+      description: GUI theme (e.g., neutrino, mariner)
+    opmode:
+      type: string
+      enum:
+        - nat
+        - transparent
+      description: Operation mode
+    central_nat:
+      type: string
+      enum:
+        - enable
+        - disable
+      description: Central NAT mode
+    gui_default_policy_columns:
+      type: array
+      items:
+        type: string
+      description: Default policy table columns
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Verify SSL certificate
+
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    action:
+      type: string
+    settings:
+      type: object
+    message:
+      type: string
+    error:
+      type: string
+
+credentials:
+  - ref: local://config/fortigate_credentials.yaml
+    type: config_file
+    required: true
+
+capabilities:
+  network:
+    outbound:
+      - https:443
+  filesystem:
+    read:
+      - config/*.yaml
+  max_execution_time_ms: 30000
+
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-21T16:55:20.522685Z'
+  certified_by: admin
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

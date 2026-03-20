@@ -1,0 +1,189 @@
+canonical_id: org.ulysses.noc.fortigate-ipsec/1.0.3
+name: FortiGate IPsec
+version: 1.0.3
+description: 'CRUD operations for IPsec Phase1 and Phase2 interfaces on FortiGate
+  devices.
+
+
+  Supports:
+
+  - Create Phase1 tunnels (static or dynamic for SD-WAN/ADVPN)
+
+  - Create Phase2 selectors with traffic definitions
+
+  - Update tunnel parameters (PSK, DPD, proposals, localid)
+
+  - List all IPsec tunnels
+
+  - Delete tunnels
+
+
+  v1.0.3: Added localid and transport parameter support for updates.
+
+
+  Essential for SD-WAN deployments where IPsec overlays are required.
+
+
+  IMPORTANT: Transport defaults to UDP to avoid conflict with HTTPS management port
+  443.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: provision
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+  - fortigate
+  - ipsec
+  - vpn
+  - tunnel
+  - phase1
+  - phase2
+  - sdwan
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-ipsec.py
+  python_packages:
+  - pyyaml>=6.0
+  - requests>=2.28.0
+  files:
+  - config/fortigate_credentials.yaml
+parameters:
+  type: object
+  required:
+  - target_ip
+  - action
+  properties:
+    target_ip:
+      type: string
+      format: ipv4
+      description: FortiGate management IP address
+    action:
+      type: string
+      enum:
+      - add
+      - update
+      - remove
+      - list
+      - get
+      description: CRUD action to perform
+    phase:
+      type: string
+      enum:
+      - '1'
+      - '2'
+      default: '1'
+      description: Phase1 or Phase2 operations
+    name:
+      type: string
+      description: Tunnel name (required for add/update/remove/get)
+    interface:
+      type: string
+      description: Outbound interface (required for Phase1 add)
+    remote_gw:
+      type: string
+      description: Remote gateway IP (0.0.0.0 for dynamic)
+    psksecret:
+      type: string
+      description: Pre-shared key (required for Phase1 add)
+    ike_version:
+      type: integer
+      enum:
+      - 1
+      - 2
+      default: 2
+      description: IKE version
+    type:
+      type: string
+      enum:
+      - static
+      - dynamic
+      description: Tunnel type (dynamic for hub accepting spokes)
+    net_device:
+      type: string
+      enum:
+      - enable
+      - disable
+      description: Enable net-device for SD-WAN
+    network_overlay:
+      type: string
+      enum:
+      - enable
+      - disable
+      description: Enable network overlay
+    network_id:
+      type: integer
+      description: Network ID for overlay
+    localid:
+      type: string
+      description: Local ID for IKE negotiation (e.g., "Spoke2-HUB1-VPN1")
+    transport:
+      type: string
+      enum:
+      - udp
+      - tcp
+      - auto
+      default: udp
+      description: IKE transport protocol. MUST be 'udp' to avoid conflict with HTTPS
+        port 443
+    phase1name:
+      type: string
+      description: Phase1 name (required for Phase2 add)
+    src_subnet:
+      type: string
+      description: Source subnet for Phase2
+    dst_subnet:
+      type: string
+      description: Destination subnet for Phase2
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Verify SSL certificate
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    action:
+      type: string
+    target_ip:
+      type: string
+    phase:
+      type: string
+    name:
+      type: string
+    message:
+      type: string
+    phase1:
+      type: object
+    phase2:
+      type: object
+    phase1_interfaces:
+      type: array
+    phase2_interfaces:
+      type: array
+    count:
+      type: integer
+credentials:
+- ref: local://config/fortigate_credentials.yaml
+  type: config_file
+  required: true
+capabilities:
+  network:
+    outbound:
+    - https:443
+  filesystem:
+    read:
+    - config/*.yaml
+  max_execution_time_ms: 30000
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-21T15:18:24.613136+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

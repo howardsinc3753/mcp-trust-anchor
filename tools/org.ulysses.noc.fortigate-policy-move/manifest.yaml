@@ -1,0 +1,111 @@
+canonical_id: org.ulysses.noc.fortigate-policy-move/1.0.0
+name: FortiGate Policy Move
+version: 1.0.0
+description: 'Move firewall policies to reorder them on FortiGate devices.
+
+
+  Supports:
+
+  - Move policy before another policy
+
+  - Move policy after another policy
+
+  - Reference policies by ID or name
+
+
+  FortiGate evaluates policies top-down (first match wins),
+
+  so policy order is critical for security.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: configure
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+  - fortigate
+  - firewall
+  - policy
+  - move
+  - reorder
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-policy-move.py
+  python_packages:
+  - pyyaml>=6.0
+  files:
+  - config/fortigate_credentials.yaml
+parameters:
+  type: object
+  required:
+  - target_ip
+  - policy_id
+  - position
+  - reference_id
+  properties:
+    target_ip:
+      type: string
+      description: FortiGate management IP address
+      format: ipv4
+    policy_id:
+      type: integer
+      description: Policy ID to move (or use policy_name)
+    policy_name:
+      type: string
+      description: Policy name to move (alternative to policy_id)
+    position:
+      type: string
+      enum:
+      - before
+      - after
+      description: Move before or after the reference policy
+    reference_id:
+      type: integer
+      description: Reference policy ID (or use reference_name)
+    reference_name:
+      type: string
+      description: Reference policy name (alternative to reference_id)
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Verify SSL certificates
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    policy_id:
+      type: integer
+    policy_name:
+      type: string
+    position:
+      type: string
+    reference_id:
+      type: integer
+    reference_name:
+      type: string
+    message:
+      type: string
+credentials:
+- ref: local://config/fortigate_credentials.yaml
+  type: config_file
+  required: true
+capabilities:
+  network:
+    outbound:
+    - https:443
+  filesystem:
+    read:
+    - config/*.yaml
+  max_execution_time_ms: 60000
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-20T03:41:01.648539+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

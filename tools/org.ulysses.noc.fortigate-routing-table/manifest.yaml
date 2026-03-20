@@ -1,0 +1,154 @@
+canonical_id: org.ulysses.noc.fortigate-routing-table/1.0.2
+name: FortiGate Routing Table
+version: 1.0.2
+description: 'View the IPv4 routing table from a FortiGate device.
+
+  Essential for troubleshooting connectivity issues, verifying route
+
+  existence, and understanding traffic flow paths.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: troubleshoot
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+  - fortigate
+  - routing
+  - network
+  - firewall
+  - troubleshooting
+  - routes
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-routing-table.py
+  python_packages:
+  - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+  - config/fortigate_credentials.yaml
+  services: []
+parameters:
+  type: object
+  required:
+  - target_ip
+  properties:
+    target_ip:
+      type: string
+      description: FortiGate management IP address
+      format: ipv4
+    filter_destination:
+      type: string
+      description: Filter routes matching this destination IP/network
+    filter_type:
+      type: string
+      enum:
+      - static
+      - connect
+      - ospf
+      - bgp
+      - rip
+      - all
+      default: all
+      description: Filter by route type
+    filter_interface:
+      type: string
+      description: Filter routes by outgoing interface
+    timeout:
+      type: integer
+      default: 30
+      description: Request timeout in seconds
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Verify SSL certificate
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: Whether the query succeeded
+    target_ip:
+      type: string
+      description: Target FortiGate IP address
+    total_routes:
+      type: integer
+      description: Total routes in routing table
+    returned_count:
+      type: integer
+      description: Number of routes returned (after filtering)
+    routes:
+      type: array
+      description: Array of route entries
+      items:
+        type: object
+        properties:
+          destination:
+            type: string
+            description: Destination network (CIDR notation)
+          gateway:
+            type: string
+            description: Next hop gateway IP
+          interface:
+            type: string
+            description: Outgoing interface
+          type:
+            type: string
+            description: Route type (static, connect, ospf, bgp)
+          distance:
+            type: integer
+            description: Administrative distance
+          metric:
+            type: integer
+            description: Route metric
+          priority:
+            type: integer
+            description: Route priority
+          is_tunnel:
+            type: boolean
+            description: Whether this is a tunnel route
+    error:
+      type: string
+      description: Error message if success is false
+credentials:
+- ref: vault://fortigate/admin
+  type: api_key
+  required: false
+  scope:
+  - read
+  description: FortiGate API key with read access
+- ref: local://config/fortigate_credentials.yaml
+  type: config_file
+  required: false
+  description: Local credential file (fallback when vault unavailable)
+capabilities:
+  network:
+    outbound:
+    - https:443
+    inbound: []
+  filesystem:
+    read:
+    - config/*.yaml
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 30000
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+versioning:
+  breaking_change: false
+  supersedes: null
+security:
+  certified: true
+  certified_at: '2026-01-21T18:00:55.726906Z'
+  certified_by: admin
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup
+status: certified
+skills_ref: Skills.md

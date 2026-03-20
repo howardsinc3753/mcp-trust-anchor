@@ -1,0 +1,124 @@
+canonical_id: org.ulysses.noc.sdwan-ip-collision-check/1.0.1
+name: SD-WAN IP Collision Check
+version: 1.0.1
+description: |
+  Validates proposed IP allocations against existing SD-WAN network inventory.
+
+  Prevents subnet overlap across sites by checking:
+  - Loopback addresses (172.16.0.x/32)
+  - LAN subnets (10.x.1.0/24)
+  - VLAN subnets (10.x.{vlan}.0/24)
+  - Management IPs
+
+  Use BEFORE provisioning new SD-WAN sites to ensure no IP conflicts.
+  Reads existing allocations from sdwan-manifest.yaml.
+
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: audit
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+    - sdwan
+    - ip-validation
+    - collision-check
+    - subnet
+    - loopback
+    - planning
+
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.sdwan-ip-collision-check.py
+  python_packages:
+    - pyyaml>=6.0
+  files:
+    - config/sdwan-manifest.yaml
+
+parameters:
+  type: object
+  required:
+    - action
+  properties:
+    action:
+      type: string
+      enum: [check, list-allocations, suggest-next]
+      description: |
+        Action to perform:
+        - check: Validate proposed subnets against existing
+        - list-allocations: Show all allocated IPs/subnets
+        - suggest-next: Suggest next available site_id with derived IPs
+    site_id:
+      type: integer
+      minimum: 1
+      maximum: 254
+      description: Proposed site_id to validate (for check action)
+    proposed_subnets:
+      type: array
+      items:
+        type: string
+      description: |
+        List of proposed subnets in CIDR notation to check.
+        Example: ["172.16.0.4/32", "10.4.1.0/24"]
+    proposed_management_ip:
+      type: string
+      format: ipv4
+      description: Proposed management IP to check for conflicts
+    include_hub:
+      type: boolean
+      default: true
+      description: Include hub allocations in collision check
+
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    action:
+      type: string
+    valid:
+      type: boolean
+      description: True if no collisions detected
+    collisions:
+      type: array
+      items:
+        type: object
+        properties:
+          proposed:
+            type: string
+          conflicts_with:
+            type: string
+          site:
+            type: string
+          collision_type:
+            type: string
+    allocations:
+      type: object
+      description: Current IP allocations by site
+    suggestion:
+      type: object
+      description: Next available site_id and derived IPs
+    message:
+      type: string
+
+credentials: []
+
+capabilities:
+  filesystem:
+    read:
+      - config/sdwan-manifest.yaml
+  max_execution_time_ms: 10000
+
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-22T17:39:53.081025Z'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup
+  changelog:
+    - version: 1.0.1
+      date: '2026-01-22'
+      change: Fixed ExecutionContext handling in main() - now extracts context.parameters

@@ -1,0 +1,107 @@
+canonical_id: org.ulysses.cloud.fortibot-models/1.0.0
+name: FortiBot.ai List Models
+version: 1.0.0
+description: 'List available AI models on FortiBot.ai platform.
+
+  Returns model IDs, providers, descriptions, and burn rates.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: cloud
+  intent: discover
+  vendor: fortibot
+  shelf: cloud/fortibot
+  tags:
+  - fortibot
+  - models
+  - ai
+  - llm
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.cloud.fortibot-models.py
+  python_packages:
+  - requests>=2.28.0
+  dotnet_packages: []
+  files: []
+  services: []
+parameters:
+  type: object
+  required: []
+  properties:
+    api_key:
+      type: string
+      description: FortiBot.ai API key (optional if using credentials)
+    base_url:
+      type: string
+      default: http://fortibot.ai:3000
+      description: FortiBot.ai API base URL
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: Whether the request succeeded
+    models:
+      type: array
+      description: List of available models
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+            description: Model identifier
+          provider:
+            type: string
+            description: Model provider
+          name:
+            type: string
+            description: Display name
+          description:
+            type: string
+            description: Model description
+          burn_rate:
+            type: number
+            description: Token burn rate multiplier
+          api_model:
+            type: string
+            description: Underlying API model ID
+    error:
+      type: string
+      description: Error message if success is false
+credentials:
+- ref: vault://fortibot/api_key
+  type: api_key
+  required: false
+  scope:
+  - read
+  description: FortiBot.ai API key
+capabilities:
+  network:
+    outbound:
+    - http:3000
+    - https:443
+    inbound: []
+  filesystem:
+    read: []
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 30000
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+versioning:
+  breaking_change: false
+  supersedes: null
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-02-03T21:41:17.971897+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

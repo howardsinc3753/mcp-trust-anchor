@@ -1,0 +1,145 @@
+canonical_id: org.ulysses.noc.fortigate-bgp-redistribute/1.0.0
+name: FortiGate BGP Redistribute
+version: 1.0.0
+description: 'Configure BGP route redistribution on FortiGate devices.
+
+
+  Controls which routes are redistributed into BGP from other
+
+  routing protocols or directly connected networks.
+
+
+  Supports:
+
+  - Get current redistribution settings
+
+  - Enable/disable redistribution of connected routes
+
+  - Enable/disable redistribution of static routes
+
+  - Enable/disable redistribution of OSPF routes
+
+  - Configure route-maps for redistribution filtering
+
+
+  API endpoint: /api/v2/cmdb/router/bgp (redistribute sections)
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: provision
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+  - fortigate
+  - bgp
+  - redistribute
+  - routing
+  - sdwan
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-bgp-redistribute.py
+  python_packages:
+  - pyyaml>=6.0
+  - requests>=2.28.0
+  files:
+  - config/fortigate_credentials.yaml
+parameters:
+  type: object
+  required:
+  - target_ip
+  properties:
+    target_ip:
+      type: string
+      format: ipv4
+      description: FortiGate management IP address
+    action:
+      type: string
+      enum:
+      - get
+      - set
+      default: get
+      description: Get current settings or set new values
+    redistribute_connected:
+      type: string
+      enum:
+      - enable
+      - disable
+      description: Redistribute directly connected routes
+    redistribute_connected_routemap:
+      type: string
+      description: Route-map for connected route redistribution
+    redistribute_static:
+      type: string
+      enum:
+      - enable
+      - disable
+      description: Redistribute static routes
+    redistribute_static_routemap:
+      type: string
+      description: Route-map for static route redistribution
+    redistribute_ospf:
+      type: string
+      enum:
+      - enable
+      - disable
+      description: Redistribute OSPF routes
+    redistribute_ospf_routemap:
+      type: string
+      description: Route-map for OSPF route redistribution
+    redistribute_rip:
+      type: string
+      enum:
+      - enable
+      - disable
+      description: Redistribute RIP routes
+    redistribute_isis:
+      type: string
+      enum:
+      - enable
+      - disable
+      description: Redistribute IS-IS routes
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Verify SSL certificate
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    action:
+      type: string
+    target_ip:
+      type: string
+    redistribute:
+      type: object
+      description: Current redistribution settings
+    updated_fields:
+      type: array
+    message:
+      type: string
+    error:
+      type: string
+credentials:
+- ref: local://config/fortigate_credentials.yaml
+  type: config_file
+  required: true
+capabilities:
+  network:
+    outbound:
+    - https:443
+  filesystem:
+    read:
+    - config/*.yaml
+  max_execution_time_ms: 30000
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-21T15:07:43.285141+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

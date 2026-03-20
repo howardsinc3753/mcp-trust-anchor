@@ -1,0 +1,80 @@
+canonical_id: org.ulysses.noc.fortigate-address/1.0.0
+name: FortiGate Address
+version: 1.0.0
+description: |
+  CRUD operations for firewall address objects on FortiGate devices.
+
+  Supports address types:
+  - ipmask: Subnet/host addresses (10.0.0.0/8)
+  - iprange: IP ranges (10.0.0.1-10.0.0.100)
+  - fqdn: Fully qualified domain names
+  - geography: Country-based addresses
+
+  Use addresses in firewall policies for source/destination matching.
+
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: provision
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+    - fortigate
+    - firewall
+    - address
+    - object
+    - network
+
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-address.py
+  python_packages:
+    - pyyaml>=6.0
+    - requests>=2.28.0
+
+parameters:
+  type: object
+  required:
+    - target_ip
+    - action
+  properties:
+    target_ip:
+      type: string
+      format: ipv4
+    action:
+      type: string
+      enum: [add, update, remove, list, get]
+    name:
+      type: string
+      description: Address object name
+    type:
+      type: string
+      enum: [ipmask, iprange, fqdn, geography]
+      default: ipmask
+    subnet:
+      type: string
+      description: "Subnet for ipmask (e.g., '10.0.0.0/8' or '10.0.0.0 255.0.0.0')"
+    start_ip:
+      type: string
+      description: Start IP for iprange
+    end_ip:
+      type: string
+      description: End IP for iprange
+    fqdn:
+      type: string
+      description: FQDN for fqdn type
+    country:
+      type: string
+      description: Country code for geography type
+    comment:
+      type: string
+
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-20T21:12:45.927277+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

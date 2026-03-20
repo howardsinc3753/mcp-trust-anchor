@@ -1,0 +1,138 @@
+canonical_id: org.ulysses.noc.fortigate-arp-table/1.0.0
+name: FortiGate ARP Table
+version: 1.0.0
+description: 'View the ARP (Address Resolution Protocol) table from a FortiGate device.
+
+  Essential for troubleshooting Layer 2 connectivity, verifying MAC address
+
+  resolution, and identifying potential IP conflicts or rogue devices.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: troubleshoot
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+  - fortigate
+  - arp
+  - network
+  - firewall
+  - troubleshooting
+  - mac-address
+  - layer2
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-arp-table.py
+  python_packages:
+  - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+  - config/fortigate_credentials.yaml
+  services: []
+parameters:
+  type: object
+  required:
+  - target_ip
+  properties:
+    target_ip:
+      type: string
+      description: FortiGate management IP address
+      format: ipv4
+    filter_ip:
+      type: string
+      description: Filter entries by IP address (exact or partial match)
+    filter_mac:
+      type: string
+      description: Filter entries by MAC address (exact or partial match)
+    filter_interface:
+      type: string
+      description: Filter entries by interface name
+    timeout:
+      type: integer
+      default: 30
+      description: Request timeout in seconds
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Verify SSL certificate
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: Whether the query succeeded
+    target_ip:
+      type: string
+      description: Target FortiGate IP address
+    total_entries:
+      type: integer
+      description: Total ARP entries on device
+    returned_count:
+      type: integer
+      description: Number of entries returned (after filtering)
+    entries:
+      type: array
+      description: Array of ARP entries
+      items:
+        type: object
+        properties:
+          ip:
+            type: string
+            description: IP address
+          mac:
+            type: string
+            description: MAC address
+          interface:
+            type: string
+            description: Interface where entry was learned
+          age:
+            type: integer
+            description: Age of entry in seconds
+    error:
+      type: string
+      description: Error message if success is false
+credentials:
+- ref: vault://fortigate/admin
+  type: api_key
+  required: false
+  scope:
+  - read
+  description: FortiGate API key with read access
+- ref: local://config/fortigate_credentials.yaml
+  type: config_file
+  required: false
+  description: Local credential file (fallback when vault unavailable)
+capabilities:
+  network:
+    outbound:
+    - https:443
+    inbound: []
+  filesystem:
+    read:
+    - config/*.yaml
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 30000
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+versioning:
+  breaking_change: false
+  supersedes: null
+security:
+  checksum_sha256: null
+  signature: null
+  cert_chain: null
+  certified: true
+  certified_at: '2026-01-20T03:41:00.481963+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup
+status: certified
+skills_ref: Skills.md

@@ -1,0 +1,168 @@
+canonical_id: org.ulysses.cloud.fortiflex-config-create/1.0.1
+name: FortiFlex Config Create
+version: 1.0.1
+description: 'Create new FortiFlex configurations for FortiGate VMs and other products.
+
+  Configurations define the product bundle (CPU cores, services) that tokens
+
+  are created from.
+
+
+  Use this to define new product bundles before creating license tokens.
+
+
+  WARNING: This creates billable configurations that consume FortiFlex points
+
+  when tokens are generated from them.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: cloud
+  intent: provision
+  vendor: fortinet
+  shelf: cloud/fortiflex
+  tags:
+  - fortiflex
+  - flexvm
+  - licensing
+  - configuration
+  - provisioning
+  - vm
+  - mssp
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.cloud.fortiflex-config-create.py
+  python_packages:
+  - requests>=2.28.0
+  - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+  - config/forticloud_credentials.yaml
+  services: []
+parameters:
+  type: object
+  required:
+  - name
+  properties:
+    name:
+      type: string
+      description: Configuration name (e.g., "sdwan-fgt-2cpu")
+    product_type:
+      type: string
+      default: fortigate-vm
+      enum:
+      - fortigate-vm
+      - fortimanager-vm
+      - fortianalyzer-vm
+      - fortiweb-vm
+      - fortiadc-vm
+      description: Product type to configure
+    cpu:
+      type: integer
+      default: 2
+      enum:
+      - 1
+      - 2
+      - 4
+      - 8
+      - 16
+      - 32
+      - 96
+      description: Number of CPU cores
+    services:
+      type: array
+      default:
+      - FC
+      - UTP
+      - ENT
+      items:
+        type: string
+      description: Service codes (FC, UTP, ENT, ATP, IPS, AV, WEB, etc.)
+    program_serial_number:
+      type: string
+      description: FortiFlex program serial number (ELAVMSXXXXXXXX)
+    api_username:
+      type: string
+      description: FortiCloud API username (overrides credential file)
+    api_password:
+      type: string
+      description: FortiCloud API password (overrides credential file)
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: Whether configuration was created
+    config_id:
+      type: integer
+      description: Created configuration ID (use in token-create)
+    name:
+      type: string
+      description: Configuration name
+    product_type:
+      type: string
+      description: Product type
+    cpu:
+      type: integer
+      description: CPU cores configured
+    services:
+      type: array
+      description: Enabled services
+    program_serial_number:
+      type: string
+      description: Program SN used
+    status:
+      type: string
+      description: Configuration status
+    message:
+      type: string
+      description: Success message with next steps
+    error:
+      type: string
+      description: Error message if success is false
+credentials:
+- ref: vault://forticloud/flexvm
+  type: api_credentials
+  required: false
+  scope:
+  - read
+  - write
+  description: FortiCloud FortiFlex API credentials
+- ref: local://config/forticloud_credentials.yaml
+  type: config_file
+  required: false
+  description: Local credential file
+capabilities:
+  network:
+    outbound:
+    - https://customerapiauth.fortinet.com:443
+    - https://support.fortinet.com:443
+    inbound: []
+  filesystem:
+    read:
+    - config/*.yaml
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 60000
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+versioning:
+  breaking_change: false
+  supersedes: null
+security:
+  checksum_sha256: null
+  signature: null
+  cert_chain: null
+  certified: true
+  certified_at: '2026-01-20T03:40:55.229111+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup
+status: certified
+skills_ref: Skills.md

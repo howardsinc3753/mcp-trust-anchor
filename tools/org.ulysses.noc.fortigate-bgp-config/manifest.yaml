@@ -1,0 +1,165 @@
+canonical_id: org.ulysses.noc.fortigate-bgp-config/1.0.0
+name: FortiGate BGP Config
+version: 1.0.0
+description: 'Configure BGP global settings on FortiGate devices.
+
+
+  Supports:
+
+  - Get current BGP configuration
+
+  - Set AS number and router-id
+
+  - Configure ibgp-multipath for ECMP
+
+  - Configure recursive-next-hop for SD-WAN
+
+  - Configure graceful-restart
+
+  - Set BGP scan-time
+
+
+  API endpoint: PUT /api/v2/cmdb/router/bgp
+
+
+  Essential for SD-WAN deployments requiring BGP routing.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: provision
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+  - fortigate
+  - bgp
+  - routing
+  - sdwan
+  - config
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-bgp-config.py
+  python_packages:
+  - pyyaml>=6.0
+  - requests>=2.28.0
+  files:
+  - config/fortigate_credentials.yaml
+parameters:
+  type: object
+  required:
+  - target_ip
+  properties:
+    target_ip:
+      type: string
+      format: ipv4
+      description: FortiGate management IP address
+    action:
+      type: string
+      enum:
+      - get
+      - set
+      default: get
+      description: 'Action: get current config or set new values'
+    as:
+      type: integer
+      description: BGP Autonomous System number (required for set if not already configured)
+    router_id:
+      type: string
+      format: ipv4
+      description: BGP router ID (typically loopback IP)
+    ibgp_multipath:
+      type: string
+      enum:
+      - enable
+      - disable
+      description: Enable IBGP multipath for ECMP load balancing
+    ibgp_multipath_same_as:
+      type: string
+      enum:
+      - enable
+      - disable
+      description: Allow multipath for neighbors with same AS
+    recursive_next_hop:
+      type: string
+      enum:
+      - enable
+      - disable
+      description: Enable recursive next-hop resolution (required for SD-WAN overlays)
+    graceful_restart:
+      type: string
+      enum:
+      - enable
+      - disable
+      description: Enable BGP graceful restart
+    graceful_restart_time:
+      type: integer
+      description: Graceful restart time in seconds (default 120)
+    graceful_stalepath_time:
+      type: integer
+      description: Graceful restart stalepath time in seconds (default 360)
+    scan_time:
+      type: integer
+      description: BGP route scan interval in seconds (default 60)
+    always_compare_med:
+      type: string
+      enum:
+      - enable
+      - disable
+      description: Always compare MED for route selection
+    deterministic_med:
+      type: string
+      enum:
+      - enable
+      - disable
+      description: Deterministic MED comparison
+    bestpath_as_path_ignore:
+      type: string
+      enum:
+      - enable
+      - disable
+      description: Ignore AS path length in bestpath selection
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Verify SSL certificate
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    action:
+      type: string
+    target_ip:
+      type: string
+    bgp_config:
+      type: object
+      description: Current BGP configuration (for get action)
+    updated_fields:
+      type: array
+      description: Fields that were updated (for set action)
+    message:
+      type: string
+    error:
+      type: string
+credentials:
+- ref: local://config/fortigate_credentials.yaml
+  type: config_file
+  required: true
+capabilities:
+  network:
+    outbound:
+    - https:443
+  filesystem:
+    read:
+    - config/*.yaml
+  max_execution_time_ms: 30000
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-21T15:02:14.801935+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

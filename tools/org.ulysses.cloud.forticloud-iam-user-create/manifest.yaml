@@ -1,0 +1,160 @@
+canonical_id: org.ulysses.cloud.forticloud-iam-user-create/1.0.0
+name: FortiCloud IAM API User Create
+version: 1.0.0
+description: 'Create IAM API users in FortiCloud using Playwright browser automation.
+
+
+  This tool automates the FortiCloud IAM portal to create API users because
+
+  Fortinet does not provide an API for this operation.
+
+
+  Workflow:
+
+  1. Login to FortiCloud portal
+
+  2. Navigate to IAM > API Users
+
+  3. Create new API user with specified permissions
+
+  4. Download credentials (API ID and Password)
+
+  5. Return credentials for tool configuration
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: cloud
+  intent: configure
+  vendor: fortinet
+  shelf: cloud/forticloud
+  tags:
+  - forticloud
+  - iam
+  - api-user
+  - playwright
+  - automation
+  - provisioning
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.cloud.forticloud-iam-user-create.py
+  python_packages:
+  - playwright>=1.40.0
+  - pyotp>=2.9.0
+  - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+  - config/forticloud_credentials.yaml
+  services: []
+parameters:
+  type: object
+  required:
+  - user_name
+  - permissions
+  properties:
+    user_name:
+      type: string
+      description: Name for the API user (e.g., "ulysses-automation")
+    description:
+      type: string
+      description: Optional description for the API user
+    permissions:
+      type: array
+      description: List of permission profiles to assign
+      items:
+        type: object
+        properties:
+          portal:
+            type: string
+            description: Portal name (e.g., "FlexVM", "Asset Management", "Organization")
+          access:
+            type: string
+            enum:
+            - Admin
+            - ReadWrite
+            - ReadOnly
+            description: Access level
+          scope:
+            type: string
+            enum:
+            - Local
+            - Organization
+            description: Scope (Local = own account, Organization = all OUs)
+    portal_username:
+      type: string
+      description: FortiCloud portal username (email)
+    portal_password:
+      type: string
+      description: FortiCloud portal password
+    mfa_secret:
+      type: string
+      description: TOTP secret for 2FA (base32)
+    headless:
+      type: boolean
+      default: true
+      description: Run browser in headless mode
+    save_credentials:
+      type: boolean
+      default: true
+      description: Save credentials to config file
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: Whether the API user was created
+    api_username:
+      type: string
+      description: Created API user ID (UUID format)
+    api_password:
+      type: string
+      description: API password (shown only once!)
+    user_name:
+      type: string
+      description: Display name of the API user
+    permissions:
+      type: array
+      description: Assigned permissions
+    credentials_saved_to:
+      type: string
+      description: Path where credentials were saved
+    error:
+      type: string
+      description: Error message if success is false
+credentials:
+- ref: local://config/forticloud_credentials.yaml
+  type: config_file
+  required: false
+  description: Portal credentials for browser login
+capabilities:
+  network:
+    outbound:
+    - https://*.fortinet.com:443
+    inbound: []
+  filesystem:
+    read:
+    - config/*.yaml
+    write: []
+  process:
+    spawn: true
+    elevated: false
+  max_execution_time_ms: 180000
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+versioning:
+  breaking_change: false
+  supersedes: null
+security:
+  checksum_sha256: null
+  signature: null
+  cert_chain: null
+  certified: true
+  certified_at: '2026-01-20T03:40:54.949925+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup
+status: certified
+skills_ref: Skills.md

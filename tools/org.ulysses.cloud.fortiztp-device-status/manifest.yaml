@@ -1,0 +1,119 @@
+canonical_id: org.ulysses.cloud.fortiztp-device-status/1.0.2
+name: FortiZTP Device Status
+version: 1.0.2
+description: |
+  Get detailed ZTP status for a specific device by serial number.
+
+  Returns complete provisioning details including target, scripts, and status.
+
+  IMPORTANT: FortiZTP does NOT support ORG IAM API Users. Only Local type works.
+
+  API Base: https://fortiztp.forticloud.com/public/api/v2
+  Client ID: fortiztp
+
+metadata:
+  org_namespace: ulysses
+  domain: cloud
+  intent: provision
+  vendor: fortinet
+  shelf: cloud/fortiztp
+  tags:
+    - fortiztp
+    - zero-touch-provisioning
+    - device
+    - status
+
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.cloud.fortiztp-device-status.py
+  python_packages:
+    - requests>=2.28.0
+    - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+    - config/forticloud_credentials.yaml
+  services: []
+
+parameters:
+  type: object
+  required:
+    - device_sn
+  properties:
+    device_sn:
+      type: string
+      description: Device serial number to check
+    api_username:
+      type: string
+      description: FortiCloud API username (overrides credential file)
+    api_password:
+      type: string
+      description: FortiCloud API password (overrides credential file)
+
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    device:
+      type: object
+      properties:
+        serial_number:
+          type: string
+        device_type:
+          type: string
+        platform:
+          type: string
+        provision_status:
+          type: string
+        provision_sub_status:
+          type: string
+        provision_target:
+          type: string
+        region:
+          type: string
+        firmware_profile:
+          type: string
+        fortimanager_oid:
+          type: integer
+        script_oid:
+          type: integer
+    error:
+      type: string
+
+credentials:
+  - ref: local://config/forticloud_credentials.yaml
+    type: config_file
+    required: false
+
+capabilities:
+  network:
+    outbound:
+      - https://customerapiauth.fortinet.com:443
+      - https://fortiztp.forticloud.com:443
+    inbound: []
+  filesystem:
+    read:
+      - config/*.yaml
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 60000
+
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+
+versioning:
+  breaking_change: false
+  supersedes: null
+
+security:
+  checksum_sha256: null
+  signature: null
+  cert_chain: null
+
+status: draft
+skills_ref: Skills.md

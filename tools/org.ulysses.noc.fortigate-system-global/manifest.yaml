@@ -1,0 +1,119 @@
+canonical_id: org.ulysses.noc.fortigate-system-global/1.0.0
+name: FortiGate System Global
+version: 1.0.0
+description: |
+  Configure FortiGate system global settings.
+
+  Manages device-wide settings like management IP, hostname,
+  admin timeout, REST API options, and other global parameters.
+
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: provision
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+    - fortigate
+    - system
+    - global
+    - config
+
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-system-global.py
+  python_packages:
+    - pyyaml>=6.0
+    - requests>=2.28.0
+  files:
+    - config/fortigate_credentials.yaml
+
+parameters:
+  type: object
+  required:
+    - target_ip
+  properties:
+    target_ip:
+      type: string
+      format: ipv4
+      description: FortiGate management IP address
+    action:
+      type: string
+      enum:
+        - get
+        - set
+      default: get
+      description: Get current settings or set new values
+    hostname:
+      type: string
+      description: Device hostname
+    management_ip:
+      type: string
+      format: ipv4
+      description: Management IP address (config system global)
+    admin_timeout:
+      type: integer
+      description: Admin session timeout in minutes
+    timezone:
+      type: string
+      description: System timezone (e.g., US/Eastern)
+    rest_api_key_url_query:
+      type: string
+      enum:
+        - enable
+        - disable
+      description: Allow API key in URL query string
+    admin_https_ssl_versions:
+      type: string
+      description: Allowed SSL/TLS versions (e.g., tlsv1-2 tlsv1-3)
+    admintimeout:
+      type: integer
+      description: CLI session timeout in minutes
+    gui_allow_incompatible_fabric_fgt:
+      type: string
+      enum:
+        - enable
+        - disable
+      description: Allow incompatible FortiGate in Security Fabric
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Verify SSL certificate
+
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    action:
+      type: string
+    settings:
+      type: object
+    message:
+      type: string
+    error:
+      type: string
+
+credentials:
+  - ref: local://config/fortigate_credentials.yaml
+    type: config_file
+    required: true
+
+capabilities:
+  network:
+    outbound:
+      - https:443
+  filesystem:
+    read:
+      - config/*.yaml
+  max_execution_time_ms: 30000
+
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-21T16:55:20.441475Z'
+  certified_by: admin
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

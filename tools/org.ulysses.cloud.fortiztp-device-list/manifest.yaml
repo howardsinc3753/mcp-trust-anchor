@@ -1,0 +1,168 @@
+canonical_id: org.ulysses.cloud.fortiztp-device-list/1.0.2
+name: FortiZTP Device List
+version: 1.0.2
+description: |
+  List all devices registered in FortiZTP with their provisioning status.
+
+  Returns device serial numbers, types, provision status, and target assignments.
+  Supports filtering by device type, provision status, and provision target.
+
+  IMPORTANT: FortiZTP does NOT support ORG IAM API Users. Only Local type works.
+
+  API Base: https://fortiztp.forticloud.com/public/api/v2
+  Client ID: fortiztp
+
+metadata:
+  org_namespace: ulysses
+  domain: cloud
+  intent: provision
+  vendor: fortinet
+  shelf: cloud/fortiztp
+  tags:
+    - fortiztp
+    - zero-touch-provisioning
+    - device
+    - inventory
+    - fortigate
+    - fortiap
+    - fortiswitch
+
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.cloud.fortiztp-device-list.py
+  python_packages:
+    - requests>=2.28.0
+    - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+    - config/forticloud_credentials.yaml
+  services: []
+
+parameters:
+  type: object
+  required: []
+  properties:
+    device_type:
+      type: string
+      enum:
+        - FortiGate
+        - FortiAP
+        - FortiSwitch
+        - FortiExtender
+      description: Filter by device type
+    provision_status:
+      type: string
+      enum:
+        - provisioned
+        - unprovisioned
+        - hidden
+        - incomplete
+      description: Filter by provisioning status
+    provision_target:
+      type: string
+      enum:
+        - FortiManager
+        - FortiGateCloud
+        - FortiEdgeCloud
+        - ExternalController
+      description: Filter by provision target
+    api_username:
+      type: string
+      description: FortiCloud API username (overrides credential file)
+    api_password:
+      type: string
+      description: FortiCloud API password (overrides credential file)
+
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: Whether the query succeeded
+    device_count:
+      type: integer
+      description: Number of devices returned
+    devices:
+      type: array
+      description: List of devices
+      items:
+        type: object
+        properties:
+          serial_number:
+            type: string
+            description: Device serial number
+          device_type:
+            type: string
+            description: Device type (FortiGate, FortiAP, etc.)
+          platform:
+            type: string
+            description: Hardware platform
+          provision_status:
+            type: string
+            description: Provisioning status
+          provision_sub_status:
+            type: string
+            description: Sub-status when incomplete
+          provision_target:
+            type: string
+            description: Target for provisioning
+          region:
+            type: string
+            description: FortiCloud region
+          firmware_profile:
+            type: string
+            description: Firmware profile name
+          fortimanager_oid:
+            type: integer
+            description: Associated FortiManager OID
+          script_oid:
+            type: integer
+            description: Associated script OID
+    error:
+      type: string
+      description: Error message if success is false
+
+credentials:
+  - ref: vault://forticloud/fortiztp
+    type: api_credentials
+    required: false
+    scope:
+      - read
+    description: FortiCloud ZTP API credentials (Local IAM user only)
+  - ref: local://config/forticloud_credentials.yaml
+    type: config_file
+    required: false
+    description: Local credential file
+
+capabilities:
+  network:
+    outbound:
+      - https://customerapiauth.fortinet.com:443
+      - https://fortiztp.forticloud.com:443
+    inbound: []
+  filesystem:
+    read:
+      - config/*.yaml
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 60000
+
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+
+versioning:
+  breaking_change: false
+  supersedes: null
+
+security:
+  checksum_sha256: null
+  signature: null
+  cert_chain: null
+
+status: draft
+skills_ref: Skills.md

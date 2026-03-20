@@ -1,0 +1,152 @@
+canonical_id: org.ulysses.cloud.forticloud-browser-base/1.0.0
+name: FortiCloud Browser Base
+version: 1.0.0
+description: 'Base library for Playwright browser automation with FortiCloud portals.
+
+  Provides login, MFA handling, session management, and common utilities.
+
+
+  Use this tool to:
+
+  - Log into FortiCloud portal (support.fortinet.com)
+
+  - Handle TOTP-based 2FA
+
+  - Navigate to specific FortiCloud services (IAM, FortiSASE, etc.)
+
+  - Capture screenshots for debugging
+
+
+  This is a library tool - import and use in other Playwright-based tools.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: cloud
+  intent: execute
+  vendor: fortinet
+  shelf: cloud/forticloud
+  tags:
+  - forticloud
+  - playwright
+  - browser
+  - automation
+  - iam
+  - mfa
+  - library
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.cloud.forticloud-browser-base.py
+  python_packages:
+  - playwright>=1.40.0
+  - pyotp>=2.9.0
+  - pyyaml>=6.0
+  - Pillow>=10.0.0
+  dotnet_packages: []
+  files:
+  - config/forticloud_credentials.yaml
+  services: []
+parameters:
+  type: object
+  required:
+  - action
+  properties:
+    action:
+      type: string
+      description: Action to perform (login, navigate, screenshot, logout)
+      enum:
+      - login
+      - navigate
+      - screenshot
+      - logout
+      - get_session
+    target_url:
+      type: string
+      description: URL to navigate to (for navigate action)
+    portal_username:
+      type: string
+      description: FortiCloud portal username (email)
+    portal_password:
+      type: string
+      description: FortiCloud portal password
+    mfa_secret:
+      type: string
+      description: TOTP secret for 2FA (base32 encoded)
+    headless:
+      type: boolean
+      default: true
+      description: Run browser in headless mode
+    timeout_ms:
+      type: integer
+      default: 30000
+      description: Page load timeout in milliseconds
+    screenshot_path:
+      type: string
+      description: Path to save screenshot (for screenshot action)
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: Whether the action succeeded
+    action:
+      type: string
+      description: Action that was performed
+    logged_in:
+      type: boolean
+      description: Whether user is logged in
+    current_url:
+      type: string
+      description: Current page URL
+    page_title:
+      type: string
+      description: Current page title
+    session_id:
+      type: string
+      description: Browser session ID (for reuse)
+    screenshot_path:
+      type: string
+      description: Path to saved screenshot
+    error:
+      type: string
+      description: Error message if success is false
+credentials:
+- ref: local://config/forticloud_credentials.yaml
+  type: config_file
+  required: false
+  description: Local credential file with portal credentials
+capabilities:
+  network:
+    outbound:
+    - https://*.fortinet.com:443
+    - https://*.forticloud.com:443
+    inbound: []
+  filesystem:
+    read:
+    - config/*.yaml
+    write:
+    - screenshots/
+    - temp/
+  process:
+    spawn: true
+    elevated: false
+  max_execution_time_ms: 120000
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+versioning:
+  breaking_change: false
+  supersedes: null
+security:
+  checksum_sha256: null
+  signature: null
+  cert_chain: null
+  certified: true
+  certified_at: '2026-01-20T03:40:54.797503+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup
+status: certified
+skills_ref: Skills.md

@@ -1,0 +1,128 @@
+canonical_id: org.ulysses.noc.fortigate-config-backup/1.0.2
+name: FortiGate Config Backup
+version: 1.0.2
+description: |
+  Export FortiGate configuration via REST API.
+  Returns full device configuration for backup/archival purposes.
+  Supports both JSON and plain-text (CLI) output formats.
+
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: audit
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+    - fortigate
+    - backup
+    - configuration
+    - export
+    - disaster-recovery
+    - cadence
+
+runtime:
+  language: python
+  entry_point: main
+  python_packages:
+    - pyyaml
+  files: []
+  services: []
+
+parameters:
+  type: object
+  required:
+    - target_ip
+  properties:
+    target_ip:
+      type: string
+      description: FortiGate management IP address
+    scope:
+      type: string
+      description: Backup scope (global or vdom-specific)
+      default: global
+      enum:
+        - global
+        - vdom
+    vdom:
+      type: string
+      description: VDOM name (only used when scope=vdom)
+      default: root
+    file_format:
+      type: string
+      description: Output format (fos for CLI text, yaml for YAML format)
+      default: fos
+      enum:
+        - fos
+        - yaml
+    password_mask:
+      type: boolean
+      description: If true, mask secrets/passwords in backup
+      default: false
+    save_to_file:
+      type: boolean
+      description: Save backup to local file
+      default: false
+    backup_path:
+      type: string
+      description: Directory to save backup file (if save_to_file=true)
+      default: C:/ProgramData/Ulysses/backups/fortigate
+    timeout:
+      type: integer
+      description: Request timeout in seconds
+      default: 60
+    verify_ssl:
+      type: boolean
+      description: Verify SSL certificate
+      default: false
+
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    target_ip:
+      type: string
+    hostname:
+      type: string
+    serial_number:
+      type: string
+    firmware_version:
+      type: string
+    backup_size_bytes:
+      type: integer
+    config_content:
+      type: string
+      description: Configuration content (may be truncated in response)
+    saved_to:
+      type: string
+      description: File path if save_to_file=true
+    backup_timestamp:
+      type: string
+    error:
+      type: string
+
+credentials:
+  - ref: vault://fortigate/admin
+    type: api_key
+    required: false
+    scope:
+      - read
+
+capabilities:
+  network:
+    outbound:
+      - "https://*:443"
+    inbound: []
+  filesystem:
+    read:
+      - "~/.config/mcp/fortigate_credentials.yaml"
+      - "C:/ProgramData/mcp/fortigate_credentials.yaml"
+      - "C:/ProgramData/Ulysses/config/fortigate_credentials.yaml"
+    write:
+      - "C:/ProgramData/Ulysses/backups/fortigate/*"
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 120000
+
+status: draft

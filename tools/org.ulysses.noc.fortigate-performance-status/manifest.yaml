@@ -1,0 +1,127 @@
+canonical_id: org.ulysses.noc.fortigate-performance-status/1.0.0
+name: FortiGate Performance Status
+version: 1.0.0
+description: Get detailed performance statistics from a FortiGate device
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: monitor
+  vendor: fortinet
+  shelf: noc/fortinet
+  tags:
+  - fortigate
+  - performance
+  - monitoring
+  - cpu
+  - memory
+  - sessions
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-performance-status.py
+  python_packages:
+  - pyyaml>=6.0
+parameters:
+  type: object
+  required:
+  - target_ip
+  properties:
+    target_ip:
+      type: string
+      description: FortiGate management IP address or hostname
+    timeout:
+      type: integer
+      default: 30
+      description: API request timeout in seconds
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Verify SSL certificate
+output_schema:
+  type: object
+  required:
+  - success
+  properties:
+    success:
+      type: boolean
+      description: Whether the operation succeeded
+    error:
+      type: string
+      description: Error message if success=false
+    target_ip:
+      type: string
+      description: Target that was queried
+    cpu:
+      type: object
+      description: CPU utilization breakdown
+      properties:
+        current:
+          type: number
+          description: Current CPU percentage
+        idle:
+          type: number
+        user:
+          type: number
+        system:
+          type: number
+    memory:
+      type: object
+      description: Memory utilization
+      properties:
+        total_mb:
+          type: integer
+          description: Total memory in MB
+        used_percent:
+          type: number
+          description: Memory usage percentage
+    uptime_seconds:
+      type: integer
+      description: Device uptime in seconds
+    sessions:
+      type: object
+      description: Session information
+      properties:
+        current:
+          type: integer
+          description: Current active sessions
+        rate:
+          type: integer
+          description: Sessions per second
+        max:
+          type: integer
+          description: Maximum sessions allowed
+    disk_percent:
+      type: number
+      description: Disk usage percentage
+    low_memory:
+      type: boolean
+      description: Whether device is in low memory state
+    conserve_mode:
+      type: integer
+      description: Conserve mode level (0=normal)
+credentials:
+- ref: vault://fortinet/fortigate
+  type: api_key
+  required: true
+- ref: local://config/fortigate_credentials.yaml
+  type: file
+  required: false
+capabilities:
+  network:
+    outbound:
+    - https:443
+  filesystem:
+    read:
+    - config/*.yaml
+    - ~/.config/mcp/*.yaml
+  process:
+    spawn: false
+  max_execution_time_ms: 30000
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-20T03:41:01.515532+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

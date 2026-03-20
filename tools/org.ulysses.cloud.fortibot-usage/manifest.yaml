@@ -1,0 +1,108 @@
+canonical_id: org.ulysses.cloud.fortibot-usage/1.0.0
+name: FortiBot.ai Usage Stats
+version: 1.0.0
+description: 'Get FortiBot.ai account usage statistics and credit balance.
+
+  Monitor token consumption, daily free allowance, and lifetime usage.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: cloud
+  intent: monitor
+  vendor: fortibot
+  shelf: cloud/fortibot
+  tags:
+  - fortibot
+  - usage
+  - billing
+  - credits
+  - monitoring
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.cloud.fortibot-usage.py
+  python_packages:
+  - requests>=2.28.0
+  dotnet_packages: []
+  files: []
+  services: []
+parameters:
+  type: object
+  required: []
+  properties:
+    api_key:
+      type: string
+      description: FortiBot.ai API key (optional if using credentials)
+    base_url:
+      type: string
+      default: http://fortibot.ai:3000
+      description: FortiBot.ai API base URL
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: Whether the request succeeded
+    credit_balance:
+      type: integer
+      description: Current credit balance
+    free_daily_tokens:
+      type: integer
+      description: Free daily token allowance
+    free_daily_used:
+      type: integer
+      description: Free daily tokens used today
+    free_daily_remaining:
+      type: integer
+      description: Free daily tokens remaining
+    total_available:
+      type: integer
+      description: Total available tokens (credits + free daily)
+    auto_replenish:
+      type: boolean
+      description: Whether auto-replenish is enabled
+    replenish_threshold:
+      type: integer
+      description: Balance threshold for auto-replenish
+    lifetime_credits_used:
+      type: integer
+      description: Total credits used since account creation
+    error:
+      type: string
+      description: Error message if success is false
+credentials:
+- ref: vault://fortibot/api_key
+  type: api_key
+  required: false
+  scope:
+  - read
+  description: FortiBot.ai API key
+capabilities:
+  network:
+    outbound:
+    - http:3000
+    - https:443
+    inbound: []
+  filesystem:
+    read: []
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 30000
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+versioning:
+  breaking_change: false
+  supersedes: null
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-02-03T21:41:06.995033+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

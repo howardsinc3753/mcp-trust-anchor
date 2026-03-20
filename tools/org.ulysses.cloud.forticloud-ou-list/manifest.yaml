@@ -1,0 +1,129 @@
+canonical_id: org.ulysses.cloud.forticloud-ou-list/1.0.0
+name: FortiCloud OU List
+version: 1.0.0
+description: 'List Organization Units (OUs) from FortiCloud Organization API.
+
+  Returns all OUs that the API user has access to with optional filtering.
+
+
+  API Base: https://support.fortinet.com/ES/api/organization/v1/
+
+  Client ID: organization
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: cloud
+  intent: discover
+  vendor: fortinet
+  shelf: cloud/forticloud
+  tags:
+  - forticloud
+  - organization
+  - ou
+  - iam
+  - mssp
+  - multi-tenant
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.cloud.forticloud-ou-list.py
+  python_packages:
+  - requests>=2.28.0
+  - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+  - config/forticloud_credentials.yaml
+  services: []
+parameters:
+  type: object
+  required: []
+  properties:
+    parent_id:
+      type: integer
+      description: Optional OU parent ID to filter results
+    name_pattern:
+      type: string
+      description: Optional search pattern for OU name
+    api_username:
+      type: string
+      description: FortiCloud API username (overrides credential file)
+    api_password:
+      type: string
+      description: FortiCloud API password (overrides credential file)
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: Whether the API call succeeded
+    org_id:
+      type: integer
+      description: Organization ID
+    ou_count:
+      type: integer
+      description: Number of OUs returned
+    org_units:
+      type: array
+      description: List of Organization Units
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+            description: OU ID
+          name:
+            type: string
+            description: OU name
+          desc:
+            type: string
+            description: OU description
+          parent_id:
+            type: integer
+            description: Parent OU ID
+    error:
+      type: string
+      description: Error message if success is false
+credentials:
+- ref: vault://forticloud/organization
+  type: api_credentials
+  required: false
+  scope:
+  - read
+  description: FortiCloud Organization API credentials
+- ref: local://config/forticloud_credentials.yaml
+  type: config_file
+  required: false
+  description: Local credential file (fallback when vault unavailable)
+capabilities:
+  network:
+    outbound:
+    - https://customerapiauth.fortinet.com:443
+    - https://support.fortinet.com:443
+    inbound: []
+  filesystem:
+    read:
+    - config/*.yaml
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 60000
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+versioning:
+  breaking_change: false
+  supersedes: null
+security:
+  checksum_sha256: null
+  signature: null
+  cert_chain: null
+  certified: true
+  certified_at: '2026-01-20T03:40:55.049063+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup
+status: certified
+skills_ref: Skills.md

@@ -1,0 +1,129 @@
+canonical_id: org.ulysses.noc.fortigate-sdwan-health-check/1.2.0
+name: FortiGate SD-WAN Health Check
+version: 1.2.0
+description: 'Create SD-WAN health checks on FortiGate devices.
+
+  Supports both SPOKE (active ping) and HUB (remote detection) modes.
+
+
+  Based on Fortinet 4D-Demo configurations:
+
+  - SPOKE: Active ping to hub loopback with SLA thresholds
+
+  - HUB: Remote detection mode for spoke health reporting
+
+
+  v1.2.0: Re-signed with current code to fix stale signature.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: provision
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+  - fortigate
+  - sdwan
+  - health-check
+  - sla
+  - monitoring
+  - advpn
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-sdwan-health-check.py
+  python_packages:
+  - pyyaml>=6.0
+  files:
+  - config/fortigate_credentials.yaml
+parameters:
+  type: object
+  required:
+  - target_ip
+  properties:
+    target_ip:
+      type: string
+      description: FortiGate management IP
+      format: ipv4
+    action:
+      type: string
+      enum:
+      - create
+      - list
+      - delete
+      default: list
+      description: Operation to perform
+    mode:
+      type: string
+      enum:
+      - spoke
+      - hub
+      description: Health check mode - spoke (active ping) or hub (remote detection)
+    name:
+      type: string
+      description: Health check name (required for create/delete)
+    server:
+      type: string
+      description: Server IP to ping (spoke mode only - usually hub loopback)
+    members:
+      type: array
+      items:
+        type: integer
+      description: List of SD-WAN member seq-nums (spoke mode)
+    latency:
+      type: integer
+      default: 200
+      description: SLA latency threshold in ms (spoke mode)
+    jitter:
+      type: integer
+      default: 50
+      description: SLA jitter threshold in ms (spoke mode)
+    packetloss:
+      type: integer
+      default: 5
+      description: SLA packet loss threshold % (spoke mode)
+    probe_timeout:
+      type: integer
+      default: 2500
+      description: Remote probe timeout in ms (hub mode)
+    priority_out_sla:
+      type: integer
+      default: 999
+      description: Priority when SLA fails (hub mode)
+    verify_ssl:
+      type: boolean
+      default: false
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    action:
+      type: string
+    health_checks:
+      type: array
+    health_check:
+      type: object
+    message:
+      type: string
+credentials:
+- ref: local://config/fortigate_credentials.yaml
+  type: config_file
+  required: true
+capabilities:
+  network:
+    outbound:
+    - https:443
+  filesystem:
+    read:
+    - config/*.yaml
+  max_execution_time_ms: 60000
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-21T13:57:42.309968+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup

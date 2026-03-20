@@ -1,0 +1,212 @@
+canonical_id: org.ulysses.noc.fortigate-network-analyzer/1.1.0
+name: FortiGate Network Analyzer
+version: 1.1.0
+description: 'Retrieve traffic logs, event logs, and session data from FortiGate devices
+
+  for NOC-focused network troubleshooting and capacity planning. Supports
+
+  filtering by IP, policy, action, service, and time range.
+
+  '
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: troubleshoot
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+  - fortigate
+  - traffic
+  - logs
+  - network
+  - firewall
+  - noc
+  - troubleshooting
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-network-analyzer.py
+  python_packages:
+  - pyyaml>=6.0
+  dotnet_packages: []
+  files:
+  - config/fortigate_credentials.yaml
+  services: []
+parameters:
+  type: object
+  required:
+  - target_ip
+  properties:
+    target_ip:
+      type: string
+      description: FortiGate management IP address
+      format: ipv4
+    port:
+      type: integer
+      default: 443
+      description: HTTPS management port (default 443, use 10443 for 71F)
+    mode:
+      type: string
+      enum:
+      - traffic
+      - event
+      - session
+      default: traffic
+      description: 'Query mode:
+
+        - traffic: Forward traffic logs with filters
+
+        - event: System/VPN event logs
+
+        - session: Sessions for specific IP (requires srcip or dstip)
+
+        '
+    rows:
+      type: integer
+      default: 100
+      minimum: 1
+      maximum: 2000
+      description: Number of log entries to return (max 2000)
+    srcip:
+      type: string
+      description: Filter by source IP address
+      format: ipv4
+    dstip:
+      type: string
+      description: Filter by destination IP address
+      format: ipv4
+    policyid:
+      type: integer
+      description: Filter by firewall policy ID
+    action:
+      type: string
+      enum:
+      - accept
+      - close
+      - timeout
+      - deny
+      description: Filter by action (accept, close, timeout, deny)
+    service:
+      type: string
+      description: Filter by service (DNS, HTTPS, SSH, etc.)
+    filter:
+      type: string
+      description: Custom FortiGate filter syntax (e.g., app=@Microsoft)
+    event_subtype:
+      type: string
+      enum:
+      - system
+      - vpn
+      - user
+      - router
+      - wireless
+      default: system
+      description: Event log subtype (only used with mode=event)
+    start_time:
+      type: string
+      description: Start time filter (ISO format)
+    end_time:
+      type: string
+      description: End time filter (ISO format)
+    timeout:
+      type: integer
+      default: 30
+      description: Request timeout in seconds
+    verify_ssl:
+      type: boolean
+      default: false
+      description: Verify SSL certificate
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: Whether the query succeeded
+    target_ip:
+      type: string
+      description: Target FortiGate IP address
+    mode:
+      type: string
+      description: Query mode used
+    device:
+      type: object
+      description: Device information
+      properties:
+        serial:
+          type: string
+        hostname:
+          type: string
+        version:
+          type: string
+        model:
+          type: string
+    query:
+      type: object
+      description: Query metadata
+      properties:
+        rows_requested:
+          type: integer
+        rows_returned:
+          type: integer
+        total_available:
+          type: integer
+        filter_applied:
+          type: string
+    results:
+      type: array
+      description: Log entries
+      items:
+        type: object
+    pagination:
+      type: object
+      properties:
+        session_id:
+          type: integer
+        has_more:
+          type: boolean
+    error:
+      type: string
+      description: Error message if success is false
+credentials:
+- ref: vault://fortigate/admin
+  type: api_key
+  required: false
+  scope:
+  - read
+  description: FortiGate API key with read access to logs
+- ref: local://config/fortigate_credentials.yaml
+  type: config_file
+  required: false
+  description: Local credential file (fallback when vault unavailable)
+capabilities:
+  network:
+    outbound:
+    - "https://{target_ip}:{port}/api/v2/*"
+    inbound: []
+  filesystem:
+    read:
+    - config/*.yaml
+    - ~/.config/mcp/*.yaml
+    write: []
+  process:
+    spawn: false
+    elevated: false
+  max_execution_time_ms: 60000
+telemetry:
+  metrics_enabled: true
+  log_level: INFO
+  trace_enabled: false
+versioning:
+  breaking_change: false
+  supersedes: org.ulysses.noc.fortigate-network-analyzer/1.0.0
+security:
+  checksum_sha256: null
+  signature: null
+  cert_chain: null
+  certified: true
+  certified_at: '2026-01-20T03:41:01.391166+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup
+status: certified
+skills_ref: Skills.md

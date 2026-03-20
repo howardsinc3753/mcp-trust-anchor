@@ -1,0 +1,121 @@
+canonical_id: org.ulysses.noc.fortigate-bgp-neighbor/1.0.0
+name: FortiGate BGP Neighbor
+version: 1.0.0
+description: |
+  CRUD operations for BGP neighbors on FortiGate devices.
+
+  Configure iBGP/eBGP neighbors with:
+  - Remote AS number
+  - Interface and update-source binding
+  - Graceful restart capability
+  - Soft reconfiguration
+  - Advertisement interval and connect timer
+
+  Required for SD-WAN neighbor configuration (BGP neighbor must exist first).
+
+metadata:
+  org_namespace: ulysses
+  domain: noc
+  intent: provision
+  vendor: fortinet
+  shelf: noc/fortigate
+  tags:
+    - fortigate
+    - bgp
+    - neighbor
+    - routing
+    - sdwan
+
+runtime:
+  language: python
+  entry_point: main
+  source_file: org.ulysses.noc.fortigate-bgp-neighbor.py
+  python_packages:
+    - pyyaml>=6.0
+  files:
+    - config/fortigate_credentials.yaml
+
+parameters:
+  type: object
+  required:
+    - target_ip
+    - action
+  properties:
+    target_ip:
+      type: string
+      description: FortiGate management IP
+      format: ipv4
+    action:
+      type: string
+      enum: [add, update, remove, list, get]
+      description: Operation to perform
+    ip:
+      type: string
+      description: BGP neighbor IP address (required for add/update/remove/get)
+    remote_as:
+      type: integer
+      description: Remote AS number (required for add)
+    interface:
+      type: string
+      description: Interface to bind neighbor to (e.g., Spoke-Lo)
+    update_source:
+      type: string
+      description: Update source interface
+    soft_reconfiguration:
+      type: string
+      enum: [enable, disable]
+      description: Enable soft reconfiguration
+    capability_graceful_restart:
+      type: string
+      enum: [enable, disable]
+      description: Enable graceful restart capability
+    advertisement_interval:
+      type: integer
+      description: Advertisement interval in seconds
+    connect_timer:
+      type: integer
+      description: Connect timer in seconds
+    next_hop_self:
+      type: string
+      enum: [enable, disable]
+      description: Enable next-hop-self for iBGP
+    verify_ssl:
+      type: boolean
+      default: false
+
+output_schema:
+  type: object
+  properties:
+    success:
+      type: boolean
+    action:
+      type: string
+    neighbors:
+      type: array
+    neighbor:
+      type: object
+    message:
+      type: string
+
+credentials:
+  - ref: local://config/fortigate_credentials.yaml
+    type: config_file
+    required: true
+
+capabilities:
+  network:
+    outbound:
+      - https:443
+  filesystem:
+    read:
+      - config/*.yaml
+  max_execution_time_ms: 60000
+
+status: certified
+skills_ref: Skills.md
+security:
+  certified: true
+  certified_at: '2026-01-20T22:41:37.421178+00:00'
+  certified_by: trust-anchor
+  algorithm: RSA-2048-PKCS1v15-SHA256
+  verified_via: trust-anchor-lookup
