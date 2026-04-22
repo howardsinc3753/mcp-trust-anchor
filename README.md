@@ -27,43 +27,68 @@ MCP Trust Anchor enables organizations to:
 
 ## Quick Start
 
-### Server Installation (Rocky Linux)
+👉 **For local evaluation, see [QUICKSTART.md](QUICKSTART.md)** — 3-minute walk-through
+covering both the Docker and native paths end-to-end, including how to prove
+the signed-tool pipeline works with the shipped mock FortiGate.
+
+The sections below are the full reference. Clone the repo first:
 
 ```bash
-# Clone the repo
-git clone https://github.com/your-org/mcp-trust-anchor.git
+git clone <this-repo-url> mcp-trust-anchor
 cd mcp-trust-anchor
+```
 
-# Run the installer
-sudo ./server/install.sh
+### Server — Option 1: Docker (easiest, cross-platform)
 
-# Verify it's running
+**Docker is optional but recommended for local eval.** One command, no Rocky VM required.
+
+```bash
+docker compose up -d              # starts Trust Anchor + Redis; keys auto-generated
 curl http://localhost:8000/health
 ```
 
-### Client Installation (Windows)
+Works on macOS, Windows, and Linux with Docker Desktop or Docker Engine + Compose v2.
+See [docker-compose.yml](docker-compose.yml) and [.env.example](.env.example) for knobs.
 
-```powershell
-# Download and run bootstrap
-.\client\bootstrap.ps1 -TrustAnchorUrl "http://your-server:8000"
+### Server — Option 2: Native install (Rocky Linux / RHEL)
 
-# Restart Claude Desktop
-```
-
-### Client Installation (Linux)
+Use this for production deployment with systemd.
 
 ```bash
-# Run bootstrap
-./client/bootstrap.sh --server http://your-server:8000
-
-# Restart Claude Code
+sudo ./server/install.sh
+curl http://localhost:8000/health
 ```
 
 ### Register Sample Tools
 
 ```bash
-python tools/register-tools.py --server http://localhost:8000
+python scripts/load-sample-tools.py --server http://localhost:8000
 ```
+
+This signs every tool in `tools/` with your server's private key. Required on first
+install — shipped tools are intentionally unsigned (or signed under a different key).
+
+### Client — wire up your AI editor
+
+Works with Claude Desktop, Claude Code (VS Code extension), and GitHub Copilot (VS Code).
+One command, detects installed editors, writes the right config for each:
+
+```bash
+python scripts/configure-editors.py --server http://localhost:8000
+```
+
+Or use the platform-specific bootstrap (installs the MCP bridge + configures Claude Desktop only):
+
+```powershell
+# Windows
+.\client\bootstrap.ps1 -TrustAnchorUrl "http://localhost:8000"
+```
+```bash
+# Linux / macOS
+./client/bootstrap.sh --server http://localhost:8000
+```
+
+Restart the editor(s) after configuring. For Copilot, switch chat mode to **Agent**.
 
 ## Architecture
 
@@ -165,6 +190,43 @@ See [TOOL-AUTHORING.md](docs/TOOL-AUTHORING.md) for the complete guide.
 |------|-------------|
 | `fortigate-health-check` | Check FortiGate firewall health metrics |
 | `sample-echo` | Simple echo for testing the framework |
+
+### No FortiGate on hand? Use the mock
+
+A stdlib-only Python stub is included so you can prove the signed-tool
+pipeline without any real hardware:
+
+```bash
+python scripts/mock-fortigate.py
+cp scripts/sample_credentials.yaml.example ~/.config/mcp/mock_credentials.yaml
+```
+
+Or run the mock as a Docker profile:
+
+```bash
+docker compose --profile mock up -d
+```
+
+Then ask your AI editor to call `fortigate-health-check` against `127.0.0.1`.
+
+## Publishing Tools
+
+Two ways to publish a tool once your Trust Anchor is up:
+
+**AI-driven (recommended for humans):** In Claude Code / Claude Desktop / GitHub Copilot,
+ask: *"Publish `path/to/my-tool.py` as a new NOC monitoring tool."* The agent will
+discover the publisher wizard via Trust Anchor and drive it.
+
+**CLI (for scripting / CI):**
+
+```bash
+python scripts/publish.py path/to/my-tool.py \
+    --domain noc \
+    --intent monitor \
+    --description "What this tool does"
+```
+
+See [docs/TOOL-AUTHORING.md](docs/TOOL-AUTHORING.md) for the full authoring guide.
 
 ## Requirements
 

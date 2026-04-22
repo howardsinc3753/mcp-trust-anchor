@@ -1,0 +1,38 @@
+{
+  "_README_remove_these_underscored_keys_before_saving": "JSON doesn't support comments — strip every line starting with _ before use.",
+
+  "_1_what_this_is": "MCP server config for Claude Code (VS Code extension) on Rocky Linux / RHEL / any Linux distro.",
+
+  "_2_save_to": "~/.config/Code/User/mcp.json",
+
+  "_3_substitute": "Replace <USERNAME> in all three paths below with the Linux user that ran ./client/bootstrap.sh.",
+
+  "_4_prereq": "You must have already run ./client/bootstrap.sh on THIS machine. That installs the MCP bridge to ~/.local/share/mcp-trust-anchor.",
+
+  "_5_trust_anchor_location": {
+    "same_rocky_box": "If Trust Anchor (docker compose up or server/install.sh) runs on the same Rocky box as Claude Code: TRUST_ANCHOR_URL = http://localhost:8000",
+    "different_box": "If Trust Anchor runs on a different host (e.g., your Rocky server, your lab box): TRUST_ANCHOR_URL = http://<trust-anchor-host-or-ip>:8000",
+    "no_https": "HTTP is fine on a trusted LAN. For anything beyond that, front the Trust Anchor with HTTPS and use https://..."
+  },
+
+  "_6_after_saving": [
+    "Restart VS Code (or reload window: Ctrl+Shift+P -> 'Developer: Reload Window').",
+    "Open Claude Code Chat (Ctrl+Alt+I).",
+    "You should see 'secure-tools' as an available MCP server.",
+    "Ask: 'list my accessible devices'  -- this hits list_accessible_devices against your Trust Anchor."
+  ],
+
+  "mcpServers": {
+    "secure-tools": {
+      "command": "/home/<USERNAME>/.local/share/mcp-trust-anchor/venv/bin/python",
+      "args": [
+        "/home/<USERNAME>/.local/share/mcp-trust-anchor/mcp_bridge/MCP-secure-tools-server.py"
+      ],
+      "env": {
+        "TRUST_ANCHOR_URL": "http://localhost:8000",
+        "CREDENTIAL_PATH": "/home/<USERNAME>/.config/mcp",
+        "PYTHONPATH": "/home/<USERNAME>/.local/share/mcp-trust-anchor"
+      }
+    }
+  }
+}

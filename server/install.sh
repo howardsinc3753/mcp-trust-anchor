@@ -234,5 +234,12 @@ echo "  - Public key: $KEYS_DIR/public.pem (distribute to clients)"
 echo
 echo "Next steps:"
 echo "  1. Configure firewall: firewall-cmd --add-port=8000/tcp --permanent"
-echo "  2. Register sample tools: python tools/register-tools.py"
-echo "  3. Configure client endpoints"
+echo "  2. Register sample tools: python scripts/load-sample-tools.py --server http://localhost:8000"
+echo "  3. Wire up your AI editor: python scripts/configure-editors.py --server http://localhost:8000"
+echo
+echo -e "${GREEN}Smoke test:${NC}"
+echo "  curl http://localhost:8000/health    # should return {\"status\":\"healthy\"}"
+echo
+echo -e "${YELLOW}Tip:${NC} If you just want to evaluate locally and don't need systemd, the Docker path"
+echo "is often easier: from the repo root, run  ${GREEN}docker compose up -d${NC}  instead."
+echo "See QUICKSTART.md for both paths side by side."

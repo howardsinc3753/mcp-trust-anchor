@@ -1,0 +1,84 @@
+# MCP Trust Anchor - Docker Compose
+#
+# OPTIONAL: This is the easiest way to run the Trust Anchor server for local
+# testing or evaluation. You do NOT need Docker to use this project — the
+# native installer (server/install.sh) is fully supported and runs Trust Anchor
+# as a systemd service on Rocky Linux / RHEL.
+#
+# Use Docker when you want:
+#   - A quick local try-it-out without provisioning a Rocky VM
+#   - Cross-platform (Mac / Windows / Linux) dev environment
+#   - Isolation from host system
+#
+# Use the native installer (server/install.sh) when you want:
+#   - Production deployment
+#   - Systemd-managed service
+#   - Rocky Linux / RHEL native
+#
+# ---------------------------------------------------------------------------
+# QUICK START
+#   cp .env.example .env        # optional — only if you want to change defaults
+#   docker compose up -d        # start Trust Anchor + Redis
+#   curl http://localhost:8000/health
+#   docker compose logs -f trust-anchor   # watch logs
+#   docker compose down         # stop
+# ---------------------------------------------------------------------------
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: trust-anchor-redis
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  trust-anchor:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: trust-anchor
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    ports:
+      - "${TRUST_ANCHOR_PORT:-8000}:8000"
+    environment:
+      TRUST_ANCHOR_HOST: 0.0.0.0
+      TRUST_ANCHOR_PORT: 8000
+      REDIS_URL: redis://redis:6379/0
+      PRIVATE_KEY_PATH: /opt/trust-anchor/keys/private.pem
+      PUBLIC_KEY_PATH: /opt/trust-anchor/keys/public.pem
+      PUBLISHER_KEYS: ${PUBLISHER_KEYS:-dev-publisher-key}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    volumes:
+      # Persists RSA keypair across container restarts. First run generates it;
+      # subsequent runs reuse it. To rotate keys: docker volume rm trust-anchor-keys
+      - trust-anchor-keys:/opt/trust-anchor/keys
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Optional mock FortiGate so NOC tools have something to talk to.
+  # Enable with: docker compose --profile mock up -d
+  mock-fortigate:
+    profiles: ["mock"]
+    build:
+      context: ./scripts
+      dockerfile: Dockerfile.mock-fortigate
+    container_name: mock-fortigate
+    restart: unless-stopped
+    ports:
+      - "8443:8443"
+
+volumes:
+  redis-data:
+  trust-anchor-keys:
